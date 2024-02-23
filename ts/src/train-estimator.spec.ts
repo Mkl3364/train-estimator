@@ -1,4 +1,4 @@
-import { InvalidTripInputException, TripRequest } from "./model/trip.request";
+import { ApiException, TripRequest } from "./model/trip.request";
 import { TrainTicketEstimator } from "./train-estimator";
 
 describe("train estimator", function () {
@@ -6,11 +6,6 @@ describe("train estimator", function () {
         expect(1 + 2).toBe(3);
     });
 });
-
-
-describe('create an object from TrainEstimator class', () => {
-
-})
 
 describe('TrainTicketEstimator', () => {
     let estimator: TrainTicketEstimator;
@@ -61,4 +56,16 @@ describe('TrainTicketEstimator', () => {
 
         await expect(estimator.estimate(tripDetails)).rejects.toThrow('Date is invalid');
     });
+    
+    it('estimate throws ApiException() when API call fails', async () => {
+        const fetchMock = jest.fn().mockRejectedValue(new ApiException());
+
+        const trainDetails: TripRequest = {
+            passengers: [{ age: 25, discounts: [] }],
+            details: { from: 'Paris', to: 'Lyon', when: new Date() }
+        }
+
+        await expect(fetchMock(`https://sncftrenitaliadb.com/api/train/estimate/price?from=${trainDetails.details.from}&to=${trainDetails.details.to}&date=${trainDetails.details.when}`)).rejects.toThrow(new ApiException());
+    });
+
 });
