@@ -30,4 +30,13 @@ describe('TrainTicketEstimator', () => {
         expect(result).toBe(0);
     });
 
+        it('throw error when start city is invalid', () => {
+        const tripDetails: TripRequest = {
+            passengers: [{ age: 25, discounts: [] }],
+            details: { from: '', to: 'Lyon', when: new Date() }
+        };
+        expect(estimator.estimate(tripDetails)).rejects.toThrow('Start city is invalid');
+        
+        })
+
 });
