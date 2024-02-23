@@ -1,17 +1,29 @@
-import { ApiException, TripRequest } from "./model/trip.request";
+import { ApiException, DiscountCard, TripRequest } from "./model/trip.request";
 import { TrainTicketEstimator } from "./train-estimator";
 
+
+
 describe("train estimator", function () {
+
     it("should work", () => {
         expect(1 + 2).toBe(3);
     });
 
-    global.fetch = jest.fn().mockResolvedValue({
-        json: () => Promise.resolve({ price: 100 }),
-    })
+
 });
 
 describe('TrainTicketEstimator', () => {
+
+    const PRICE = 100;
+    const THIRTY_DAYS_DISCOUNT = 0.2;
+    const SEVENTY_YEARS_DISCOUNT = 0.8;
+    const HEIGHTEEN_YEARS_DISCOUNT = 0.6;
+    const SENIOR_DISCOUNT = 0.2;
+
+    global.fetch = jest.fn().mockResolvedValue({
+        json: () => Promise.resolve({ price: PRICE }),
+    })
+
     let estimator: TrainTicketEstimator;
 
     beforeEach(() => {
@@ -100,5 +112,54 @@ describe('TrainTicketEstimator', () => {
         expect(result).toBe(0);
     });
 
-    
+    it('should apply 40% for passengers below 18 years old before 30days', async () => {
+        const futureDate = new Date();
+        futureDate.setDate(futureDate.getDate() + 40);
+        const expectedResult = Math.round((HEIGHTEEN_YEARS_DISCOUNT - THIRTY_DAYS_DISCOUNT) * PRICE);
+        const tripRequest: TripRequest = {
+            passengers: [{ age: 16, discounts: [] }],
+            details: {
+                from: 'Paris',
+                to: 'Lyon',
+                when: futureDate
+            }
+        };
+        const result = await estimator.estimate(tripRequest);
+
+        expect(result).toBe(expectedResult);
+    })
+
+    it('should apply 20% for passengers above 70 years old before 30days', async () => {
+        const futureDate = new Date();
+        futureDate.setDate(futureDate.getDate() + 40);
+        const expectedResult = Math.round((SEVENTY_YEARS_DISCOUNT - THIRTY_DAYS_DISCOUNT) * PRICE);
+        const tripRequest: TripRequest = {
+            passengers: [{ age: 71, discounts: [] }],
+            details: {
+                from: 'Paris',
+                to: 'Lyon',
+                when: futureDate
+            }
+        };
+        const result = await estimator.estimate(tripRequest);
+
+        expect(result).toBe(expectedResult);
+    })
+
+    it('should apply 20% for passengers above 70 years old before 30days with senior card discount', async () => {
+        const futureDate = new Date();
+        futureDate.setDate(futureDate.getDate() + 40);
+        const priceAfterDiscount = Math.round((SEVENTY_YEARS_DISCOUNT - SENIOR_DISCOUNT - THIRTY_DAYS_DISCOUNT) * PRICE);
+        const tripRequest: TripRequest = {
+            passengers: [{ age: 71, discounts: [DiscountCard.Senior] }],
+            details: {
+                from: 'Paris',
+                to: 'Lyon',
+                when: futureDate
+            }
+        };
+        const priceToPay = await estimator.estimate(tripRequest);
+
+        expect(priceToPay).toBe(priceAfterDiscount);
+    })
 });
