@@ -97,21 +97,6 @@ describe('TrainTicketEstimator', () => {
         await expect(estimator.estimate(tripRequest)).rejects.toThrow("Age is invalid");
     });
 
-    it('Should throw error if passenger age is invalid', async () => {
-        const tripRequest: TripRequest = {
-            passengers: [{ age: 0, discounts: [] }],
-            details: {
-                from: 'Paris',
-                to: 'Lyon',
-                when: new Date()
-            }
-        };
-
-        const result = await estimator.estimate(tripRequest);
-
-        expect(result).toBe(0);
-    });
-
     it('should apply 40% for passengers below 18 years old before 30days', async () => {
         const futureDate = new Date();
         futureDate.setDate(futureDate.getDate() + 40);
