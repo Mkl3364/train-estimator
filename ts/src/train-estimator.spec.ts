@@ -19,6 +19,7 @@ describe('TrainTicketEstimator', () => {
     const SEVENTY_YEARS_DISCOUNT = 0.8;
     const HEIGHTEEN_YEARS_DISCOUNT = 0.6;
     const SENIOR_DISCOUNT = 0.2;
+    const FIFTY_YEARS_INCREASE = 1.2;
 
     global.fetch = jest.fn().mockResolvedValue({
         json: () => Promise.resolve({ price: PRICE }),
@@ -146,5 +147,22 @@ describe('TrainTicketEstimator', () => {
         const priceToPay = await estimator.estimate(tripRequest);
 
         expect(priceToPay).toBe(priceAfterDiscount);
+    })
+
+    it('should apply +20% for passengers between 18yo and 70 before 30days', async () => {
+        const futureDate = new Date();
+        futureDate.setDate(futureDate.getDate() + 40);
+        const priceAfterIncrease = Math.round((FIFTY_YEARS_INCREASE - THIRTY_DAYS_DISCOUNT) * PRICE);
+        const tripRequest: TripRequest = {
+            passengers: [{ age: 50, discounts: [] }],
+            details: {
+                from: 'Paris',
+                to: 'Lyon',
+                when: futureDate
+            }
+        };
+        const priceToPay = await estimator.estimate(tripRequest);
+
+        expect(priceToPay).toBe(priceAfterIncrease);
     })
 });
