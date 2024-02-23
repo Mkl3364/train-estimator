@@ -5,6 +5,10 @@ describe("train estimator", function () {
     it("should work", () => {
         expect(1 + 2).toBe(3);
     });
+
+    global.fetch = jest.fn().mockResolvedValue({
+        json: () => Promise.resolve({ price: 100 }),
+    })
 });
 
 describe('TrainTicketEstimator', () => {
@@ -56,7 +60,7 @@ describe('TrainTicketEstimator', () => {
 
         await expect(estimator.estimate(tripDetails)).rejects.toThrow('Date is invalid');
     });
-    
+
     it('estimate throws ApiException() when API call fails', async () => {
         const fetchMock = jest.fn().mockRejectedValue(new ApiException());
 
@@ -65,7 +69,36 @@ describe('TrainTicketEstimator', () => {
             details: { from: 'Paris', to: 'Lyon', when: new Date() }
         }
 
-        await expect(fetchMock(`https://sncftrenitaliadb.com/api/train/estimate/price?from=${trainDetails.details.from}&to=${trainDetails.details.to}&date=${trainDetails.details.when}`)).rejects.toThrow(new ApiException());
+        expect(async () => await fetchMock(`https://sncftrenitaliadb.com/api/train/estimate/price?from=${trainDetails.details.from}&to=${trainDetails.details.to}&date=${trainDetails.details.when}`)).rejects.toEqual(new ApiException())
     });
 
+    it('Should throw error if passenger age is invalid', async () => {
+        const tripRequest: TripRequest = {
+            passengers: [{ age: -1, discounts: [] }],
+            details: {
+                from: 'Paris',
+                to: 'Lyon',
+                when: new Date()
+            }
+        };
+
+        await expect(estimator.estimate(tripRequest)).rejects.toThrow("Age is invalid");
+    });
+
+    it('Should throw error if passenger age is invalid', async () => {
+        const tripRequest: TripRequest = {
+            passengers: [{ age: 0, discounts: [] }],
+            details: {
+                from: 'Paris',
+                to: 'Lyon',
+                when: new Date()
+            }
+        };
+
+        const result = await estimator.estimate(tripRequest);
+
+        expect(result).toBe(0);
+    });
+
+    
 });
