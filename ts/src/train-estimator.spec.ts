@@ -1,4 +1,4 @@
-import { TripRequest } from "./model/trip.request";
+import { InvalidTripInputException, TripRequest } from "./model/trip.request";
 import { TrainTicketEstimator } from "./train-estimator";
 
 describe("train estimator", function () {
@@ -50,7 +50,7 @@ describe('TrainTicketEstimator', () => {
     });
 
 
-    test('estimate throws error when date is invalid', async () => {
+    it('estimate throws error when date is invalid', async () => {
         const invalidDate = new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate(), 0, 0, 0);
         invalidDate.setDate(invalidDate.getDate() - 1);
 
