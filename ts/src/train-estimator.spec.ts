@@ -1,4 +1,4 @@
-import { InvalidTripInputException, TripRequest } from "./model/trip.request";
+import { TripRequest } from "./model/trip.request";
 import { TrainTicketEstimator } from "./train-estimator";
 
 describe("train estimator", function () {
@@ -39,14 +39,26 @@ describe('TrainTicketEstimator', () => {
 
     });
 
-    
+
     it('estimate throws error when destination city is invalid', async () => {
         const tripDetails: TripRequest = {
             passengers: [{ age: 25, discounts: [] }],
-            details: { from: 'Paris', to: '', when: new Date() } 
+            details: { from: 'Paris', to: '', when: new Date() }
         };
 
         await expect(estimator.estimate(tripDetails)).rejects.toThrow('Destination city is invalid');
     });
 
+
+    test('estimate throws error when date is invalid', async () => {
+        const invalidDate = new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate(), 0, 0, 0);
+        invalidDate.setDate(invalidDate.getDate() - 1);
+
+        const tripDetails: TripRequest = {
+            passengers: [{ age: 25, discounts: [] }],
+            details: { from: 'Paris', to: 'Lyon', when: invalidDate }
+        };
+
+        await expect(estimator.estimate(tripDetails)).rejects.toThrow('Date is invalid');
+    });
 });
