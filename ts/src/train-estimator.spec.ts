@@ -198,7 +198,7 @@ describe("TrainTicketEstimator", () => {
 		expect(result).toBe(1);
 	});
 
-	test("Train date is 30 days or more in the future", async () => {
+	it("Train date is 30 days or more in the future", async () => {
 		const futurPrice = Math.round(
 			(FIFTY_YEARS_INCREASE - THIRTY_DAYS_DISCOUNT) * PRICE
 		);
@@ -216,7 +216,7 @@ describe("TrainTicketEstimator", () => {
 		expect(result).toBe(futurPrice);
 	});
 
-	test("Train date is between 5 and 30 days in the future", async () => {
+	it("Train date is between 5 and 30 days in the future", async () => {
 		const tripRequest: TripRequest = {
 			passengers: [{ age: 30, discounts: [] }],
 			details: {
@@ -231,7 +231,7 @@ describe("TrainTicketEstimator", () => {
 		expect(result).toBe(PRICE);
 	});
 
-	test("Train date is 5days or less in the future", async () => {
+	it("Train date is 5days or less in the future", async () => {
 		const futurPrice = Math.round((1 + FIFTY_YEARS_INCREASE) * PRICE);
 		const tripRequest: TripRequest = {
 			passengers: [{ age: 30, discounts: [] }],
