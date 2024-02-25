@@ -212,4 +212,21 @@ describe("TrainTicketEstimator", () => {
 		expect(result).toBe(futurPrice);
 	});
 
+    
+    test("Train date is between 5 and 30 days in the future", async () => {
+        futureDateFortyDay.setDate(futureDateFortyDay.getDate() + 20)
+		const tripRequest: TripRequest = {
+			passengers: [{ age: 30, discounts: [] }],
+			details: {
+				from: "Paris",
+				to: "Lyon",
+				when: futureDateFortyDay,
+			},
+		};
+
+        const result = await estimator.estimate(tripRequest);
+
+		expect(result).toBe(PRICE); 
+	});
+
 });
