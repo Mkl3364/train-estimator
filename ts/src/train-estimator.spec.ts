@@ -16,6 +16,10 @@ describe("TrainTicketEstimator", () => {
 	const FIFTY_YEARS_INCREASE = 1.2;
 	const futureDateFortyDay = new Date();
 	futureDateFortyDay.setDate(futureDateFortyDay.getDate() + 40);
+    const futureDateTwentyDay = new Date();
+	futureDateTwentyDay.setDate(futureDateTwentyDay.getDate() + 20);
+    const futureDateFiveDay = new Date();
+	futureDateFiveDay.setDate(futureDateFiveDay.getDate() + 4);
 
 	global.fetch = jest.fn().mockResolvedValue({
 		json: () => Promise.resolve({ price: PRICE }),
@@ -212,21 +216,33 @@ describe("TrainTicketEstimator", () => {
 		expect(result).toBe(futurPrice);
 	});
 
-    
-    test("Train date is between 5 and 30 days in the future", async () => {
-        futureDateFortyDay.setDate(futureDateFortyDay.getDate() + 20)
+	test("Train date is between 5 and 30 days in the future", async () => {
 		const tripRequest: TripRequest = {
 			passengers: [{ age: 30, discounts: [] }],
 			details: {
 				from: "Paris",
 				to: "Lyon",
-				when: futureDateFortyDay,
+				when: futureDateTwentyDay,
 			},
 		};
 
-        const result = await estimator.estimate(tripRequest);
+		const result = await estimator.estimate(tripRequest);
 
-		expect(result).toBe(PRICE); 
+		expect(result).toBe(PRICE);
 	});
 
+	test("Train date is 5days or less in the future", async () => {
+		const futurPrice = Math.round((1 + FIFTY_YEARS_INCREASE) * PRICE);
+		const tripRequest: TripRequest = {
+			passengers: [{ age: 30, discounts: [] }],
+			details: {
+				from: "Paris",
+				to: "Lyon",
+				when: futureDateFiveDay,
+			},
+		};
+		const result = await estimator.estimate(tripRequest);
+
+		expect(result).toBe(futurPrice);
+	});
 });
