@@ -165,4 +165,19 @@ describe('TrainTicketEstimator', () => {
 
         expect(priceToPay).toBe(priceAfterIncrease);
     })
+
+    it('Estimate for passengers with TrainStroke card should have a fixed price of 1', async () => {
+        const tripRequest: TripRequest = {
+            passengers: [{ age: 30, discounts: [DiscountCard.TrainStroke] }],
+            details: {
+                from: 'CityA',
+                to: 'CityB',
+                when: new Date()
+            }
+        };
+    
+        const result = await estimator.estimate(tripRequest);
+    
+        expect(result).toBe(1);
+    });
 });
