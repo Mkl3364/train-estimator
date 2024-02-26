@@ -272,16 +272,17 @@ describe("TrainTicketEstimator", () => {
 	});
 
 	it('should apply 20% discount for each passengers in couple and adult', async () => {
+		const totalPriceFor2Tickets = 200;
 		const tripRequest: TripRequest = {
-			passengers: [{ age: 25, discounts: [DiscountCard.Couple] }, { age: 30, discounts: [] }],
+			passengers: [{ age: 25, discounts: [] }, { age: 30, discounts: [DiscountCard.Couple] }],
 			details: {
 				from: "Paris",
 				to: "Lyon",
-				when: new Date(),
+				when: futureDateFortyDay,
 			},
 		};
 
-		const ticketPrice = PRICE - (PRICE * 0.2) * 2;
+		const ticketPrice = totalPriceFor2Tickets - (PRICE * 0.2 *2);
 
 		const result = await estimator.estimate(tripRequest);
 
