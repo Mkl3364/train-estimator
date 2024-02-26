@@ -166,7 +166,7 @@ describe("TrainTicketEstimator", () => {
 		expect(priceToPay).toBe(priceAfterDiscount);
 	});
 
-	it("should apply +20% for passengers between 18yo and 70 before 30days", async () => {
+	it("should apply +20% for passengers between 18years old and 70 years old before 30days", async () => {
 		const priceAfterIncrease = Math.round(
 			(FIFTY_YEARS_INCREASE - THIRTY_DAYS_DISCOUNT) * PRICE
 		);
@@ -183,7 +183,80 @@ describe("TrainTicketEstimator", () => {
 		expect(priceToPay).toBe(priceAfterIncrease);
 	});
 
-	it("Estimate for passengers with TrainStroke card should have a fixed price of 1", async () => {
+	it('should apply a unique price of 9 euros for passengers below 4 years old', async () => {
+		const tripRequest: TripRequest = {
+			passengers: [{ age: 3, discounts: [] }],
+			details: {
+				from: "Paris",
+				to: "Lyon",
+				when: new Date(),
+			},
+		};
+		const result = await estimator.estimate(tripRequest);
+
+		expect(result).toBe(9);
+	})
+
+	it("Train date is 30 days or more in the future", async () => {
+		const futurePrice = Math.round(
+			(FIFTY_YEARS_INCREASE - THIRTY_DAYS_DISCOUNT) * PRICE
+		);
+		const tripRequest: TripRequest = {
+			passengers: [{ age: 30, discounts: [] }],
+			details: {
+				from: "Paris",
+				to: "Lyon",
+				when: futureDateFortyDay,
+			},
+		};
+
+		const result = await estimator.estimate(tripRequest);
+
+		expect(result).toBe(futurePrice);
+	});
+
+	it("Train ticket date is between 5 and 30 days (20 days)", async () => {
+		const tripRequest: TripRequest = {
+			passengers: [{ age: 30, discounts: [] }],
+			details: {
+				from: "Paris",
+				to: "Lyon",
+				when: futureDateFortyDay,
+			},
+		};
+
+		const ticketDate = tripRequest.details.when;
+		ticketDate.setDate(ticketDate.getDate() + 20);
+		const currentDate = new Date();
+
+		const diff = Math.abs(ticketDate.getTime() - currentDate.getTime());
+        const diffDays = Math.ceil(diff / (1000 * 3600 * 24));
+
+		const ticketPrice = PRICE + (20 - diffDays) * 0.02 * PRICE;
+		
+
+
+		const result = await estimator.estimate(tripRequest);
+
+		expect(result).toBe(ticketPrice);
+	});
+
+	it("Train date is 5days or less in the future", async () => {
+		const futurPrice = Math.round((1 + FIFTY_YEARS_INCREASE) * PRICE);
+		const tripRequest: TripRequest = {
+			passengers: [{ age: 30, discounts: [] }],
+			details: {
+				from: "Paris",
+				to: "Lyon",
+				when: new Date(),
+			},
+		};
+		const result = await estimator.estimate(tripRequest);
+
+		expect(result).toBe(futurPrice);
+	});
+
+	it("should apply a unique price of 1 euro for passengers with a TrainStroke card", async () => {
 		const tripRequest: TripRequest = {
 			passengers: [{ age: 30, discounts: [DiscountCard.TrainStroke] }],
 			details: {
@@ -198,51 +271,21 @@ describe("TrainTicketEstimator", () => {
 		expect(result).toBe(1);
 	});
 
-	it("Train date is 30 days or more in the future", async () => {
-		const futurPrice = Math.round(
-			(FIFTY_YEARS_INCREASE - THIRTY_DAYS_DISCOUNT) * PRICE
-		);
+	it('should apply 20% discount for each passengers in couple and adult', async () => {
 		const tripRequest: TripRequest = {
-			passengers: [{ age: 30, discounts: [] }],
+			passengers: [{ age: 25, discounts: [DiscountCard.Couple] }, { age: 30, discounts: [] }],
 			details: {
 				from: "Paris",
 				to: "Lyon",
-				when: futureDateFortyDay,
+				when: new Date(),
 			},
 		};
 
-		const result = await estimator.estimate(tripRequest);
-
-		expect(result).toBe(futurPrice);
-	});
-
-	it("Train date is between 5 and 30 days in the future", async () => {
-		const tripRequest: TripRequest = {
-			passengers: [{ age: 30, discounts: [] }],
-			details: {
-				from: "Paris",
-				to: "Lyon",
-				when: futureDateTwentyDay,
-			},
-		};
+		const ticketPrice = PRICE - (PRICE * 0.2) * 2;
 
 		const result = await estimator.estimate(tripRequest);
 
-		expect(result).toBe(PRICE);
-	});
-
-	it("Train date is 5days or less in the future", async () => {
-		const futurPrice = Math.round((1 + FIFTY_YEARS_INCREASE) * PRICE);
-		const tripRequest: TripRequest = {
-			passengers: [{ age: 30, discounts: [] }],
-			details: {
-				from: "Paris",
-				to: "Lyon",
-				when: futureDateFiveDay,
-			},
-		};
-		const result = await estimator.estimate(tripRequest);
-
-		expect(result).toBe(futurPrice);
-	});
+		expect(result).toBe(ticketPrice);
+	})
 });
+
