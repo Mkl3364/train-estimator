@@ -288,5 +288,19 @@ describe("TrainTicketEstimator", () => {
 
 		expect(result).toBe(ticketPrice);
 	})
+
+	it('should apply 10 % discount for the half couple card', async () => {
+		const tripRequest: TripRequest = {
+			passengers: [{ age: 30, discounts: [DiscountCard.HalfCouple] }],
+			details: {
+				from: "Paris",
+				to: "Lyon",
+				when: futureDateFortyDay,
+			},
+		};
+		const priceAfterDiscount = PRICE - (PRICE * 0.10);
+		const result = await estimator.estimate(tripRequest);
+		expect(result).toBe(priceAfterDiscount);		
+	})
 });
 
