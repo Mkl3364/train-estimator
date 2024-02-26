@@ -19,16 +19,7 @@ export class TrainTicketEstimator {
             throw new InvalidTripInputException("Date is invalid");
         }
 
-        const url = `https://sncftrenitaliadb.com/api/train/estimate/price?from=${trainDetails.details.from}&to=${trainDetails.details.to}&date=${trainDetails.details.when}`;
-
-        let ticketPrice = 0;
-        try {
-            const request = await fetch(url)
-            const response = await request.json();
-            ticketPrice = response.price;
-        } catch (error) {
-            throw new ApiException();
-        }
+        const ticketPrice = await this.fetchTicketApi(trainDetails);
 
         const passengers = trainDetails.passengers;
         let tot = 0;
@@ -113,5 +104,17 @@ export class TrainTicketEstimator {
         }
 
         return tot;
+    }
+
+    private async fetchTicketApi(trainDetails: Pick<TripRequest, 'details'>): Promise<number> {
+        const url = `https://sncftrenitaliadb.com/api/train/estimate/price?from=${trainDetails.details.from}&to=${trainDetails.details.to}&date=${trainDetails.details.when}`;
+
+        try {
+            const request = await fetch(url);
+            const response = await request.json();
+            return response.price;
+        } catch (error) {
+            throw new ApiException();
+        }
     }
 }
