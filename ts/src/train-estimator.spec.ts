@@ -16,9 +16,9 @@ describe("TrainTicketEstimator", () => {
 	const FIFTY_YEARS_INCREASE = 1.2;
 	const futureDateFortyDay = new Date();
 	futureDateFortyDay.setDate(futureDateFortyDay.getDate() + 40);
-    const futureDateTwentyDay = new Date();
+	const futureDateTwentyDay = new Date();
 	futureDateTwentyDay.setDate(futureDateTwentyDay.getDate() + 20);
-    const futureDateFiveDay = new Date();
+	const futureDateFiveDay = new Date();
 	futureDateFiveDay.setDate(futureDateFiveDay.getDate() + 4);
 
 	global.fetch = jest.fn().mockResolvedValue({
@@ -230,11 +230,23 @@ describe("TrainTicketEstimator", () => {
 		const currentDate = new Date();
 
 		const diff = Math.abs(ticketDate.getTime() - currentDate.getTime());
-        const diffDays = Math.ceil(diff / (1000 * 3600 * 24));
+		const diffDays = Math.ceil(diff / (1000 * 3600 * 24));
 
-		const ticketPrice = PRICE + (20 - diffDays) * 0.02 * PRICE;
-		
+		let ticketPrice;
 
+		if (diffDays >= 5 && diffDays <= 29) {
+			// Apply 2% daily increase for 25 days
+			ticketPrice = PRICE * Math.pow(1.02, 25);
+		} else if (diffDays === 30) {
+			// Apply -18% increase for the 29th day
+			ticketPrice = PRICE * 0.82;
+		} else if (diffDays === 4) {
+			// Apply +30% increase for the 5th day
+			ticketPrice = PRICE * 1.30;
+		} else {
+			// Default calculation if outside the specified range
+			ticketPrice = PRICE;
+		}
 
 		const result = await estimator.estimate(tripRequest);
 
@@ -282,7 +294,7 @@ describe("TrainTicketEstimator", () => {
 			},
 		};
 
-		const ticketPrice = totalPriceFor2Tickets - (PRICE * 0.2 *2);
+		const ticketPrice = totalPriceFor2Tickets - (PRICE * 0.2 * 2);
 
 		const result = await estimator.estimate(tripRequest);
 
@@ -300,7 +312,7 @@ describe("TrainTicketEstimator", () => {
 		};
 		const priceAfterDiscount = PRICE - (PRICE * 0.10);
 		const result = await estimator.estimate(tripRequest);
-		expect(result).toBe(priceAfterDiscount);		
+		expect(result).toBe(priceAfterDiscount);
 	})
 });
 
