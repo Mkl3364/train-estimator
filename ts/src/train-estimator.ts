@@ -3,25 +3,23 @@ import { ApiException, DiscountCard, InvalidTripInputException, TripRequest } fr
 export class TrainTicketEstimator {
 
     async estimate(trainDetails: TripRequest): Promise<number> {
-        if (trainDetails.passengers.length === 0) {
-            return 0;
-        }
+        const { details, passengers } = trainDetails;
 
-        if (trainDetails.details.from.trim().length === 0) {
-            throw new InvalidTripInputException("Start city is invalid");
-        }
+        if (!passengers.length) return 0
 
-        if (trainDetails.details.to.trim().length === 0) {
-            throw new InvalidTripInputException("Destination city is invalid");
-        }
+        const { from, to, when } = details;
 
-        if (trainDetails.details.when < new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate(), 0, 0, 0)) {
+        if (!from.trim().length) throw new InvalidTripInputException("Start city is invalid")
+
+        if (!to.trim().length) throw new InvalidTripInputException("Destination city is invalid");
+        
+
+        if (when < new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate(), 0, 0, 0)) {
             throw new InvalidTripInputException("Date is invalid");
         }
 
         const ticketPrice = await this.fetchTicketApi(trainDetails);
 
-        const passengers = trainDetails.passengers;
         let tot = 0;
         let tmp = ticketPrice;
         for (let i = 0; i < passengers.length; i++) {
