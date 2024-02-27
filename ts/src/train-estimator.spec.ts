@@ -35,6 +35,10 @@ describe("TrainTicketEstimator", () => {
 		const tripDetails: TripRequest = {
 			passengers: [],
 			details: { from: "Paris", to: "Lyon", when: new Date() },
+			trainDetails: {
+				seats: [],
+				isFull: false
+			}
 		};
 
 		const result = await estimator.estimate(tripDetails);
@@ -46,6 +50,10 @@ describe("TrainTicketEstimator", () => {
 		const tripDetails: TripRequest = {
 			passengers: [{ age: 25, discounts: [] }],
 			details: { from: "", to: "Lyon", when: new Date() },
+			trainDetails: {
+				seats: [],
+				isFull: false
+			}
 		};
 		expect(estimator.estimate(tripDetails)).rejects.toThrow(
 			"Start city is invalid"
@@ -56,6 +64,10 @@ describe("TrainTicketEstimator", () => {
 		const tripDetails: TripRequest = {
 			passengers: [{ age: 25, discounts: [] }],
 			details: { from: "Paris", to: "", when: new Date() },
+			trainDetails: {
+				seats: [],
+				isFull: false
+			}
 		};
 
 		await expect(estimator.estimate(tripDetails)).rejects.toThrow(
@@ -77,6 +89,10 @@ describe("TrainTicketEstimator", () => {
 		const tripDetails: TripRequest = {
 			passengers: [{ age: 25, discounts: [] }],
 			details: { from: "Paris", to: "Lyon", when: invalidDate },
+			trainDetails: {
+				seats: [],
+				isFull: false
+			}
 		};
 
 		await expect(estimator.estimate(tripDetails)).rejects.toThrow(
@@ -90,6 +106,10 @@ describe("TrainTicketEstimator", () => {
 		const trainDetails: TripRequest = {
 			passengers: [{ age: 25, discounts: [] }],
 			details: { from: "Paris", to: "Lyon", when: new Date() },
+			trainDetails: {
+				seats: [],
+				isFull: false
+			}
 		};
 
 		expect(
@@ -108,6 +128,10 @@ describe("TrainTicketEstimator", () => {
 				to: "Lyon",
 				when: new Date(),
 			},
+			trainDetails: {
+				seats: [],
+				isFull: false
+			}
 		};
 
 		await expect(estimator.estimate(tripRequest)).rejects.toThrow(
@@ -126,6 +150,10 @@ describe("TrainTicketEstimator", () => {
 				to: "Lyon",
 				when: futureDateFortyDay,
 			},
+			trainDetails: {
+				seats: [],
+				isFull: false
+			}
 		};
 		const result = await estimator.estimate(tripRequest);
 
@@ -143,6 +171,10 @@ describe("TrainTicketEstimator", () => {
 				to: "Lyon",
 				when: futureDateFortyDay,
 			},
+			trainDetails: {
+				seats: [],
+				isFull: false
+			}
 		};
 		const result = await estimator.estimate(tripRequest);
 
@@ -160,6 +192,10 @@ describe("TrainTicketEstimator", () => {
 				to: "Lyon",
 				when: futureDateFortyDay,
 			},
+			trainDetails: {
+				seats: [],
+				isFull: false
+			}
 		};
 		const priceToPay = await estimator.estimate(tripRequest);
 
@@ -177,6 +213,10 @@ describe("TrainTicketEstimator", () => {
 				to: "Lyon",
 				when: futureDateFortyDay,
 			},
+			trainDetails: {
+				seats: [],
+				isFull: false
+			}
 		};
 		const priceToPay = await estimator.estimate(tripRequest);
 
@@ -191,6 +231,10 @@ describe("TrainTicketEstimator", () => {
 				to: "Lyon",
 				when: new Date(),
 			},
+			trainDetails: {
+				seats: [],
+				isFull: false
+			}
 		};
 		const result = await estimator.estimate(tripRequest);
 
@@ -208,6 +252,10 @@ describe("TrainTicketEstimator", () => {
 				to: "Lyon",
 				when: futureDateFortyDay,
 			},
+			trainDetails: {
+				seats: [],
+				isFull: false
+			}
 		};
 
 		const result = await estimator.estimate(tripRequest);
@@ -223,6 +271,10 @@ describe("TrainTicketEstimator", () => {
 				to: "Lyon",
 				when: futureDateFortyDay,
 			},
+			trainDetails: {
+				seats: [],
+				isFull: false
+			}
 		};
 
 		const ticketDate = tripRequest.details.when;
@@ -262,6 +314,10 @@ describe("TrainTicketEstimator", () => {
 				to: "Lyon",
 				when: new Date(),
 			},
+			trainDetails: {
+				seats: [],
+				isFull: false
+			}
 		};
 		const result = await estimator.estimate(tripRequest);
 
@@ -276,6 +332,10 @@ describe("TrainTicketEstimator", () => {
 				to: "Lyon",
 				when: new Date(),
 			},
+			trainDetails: {
+				seats: [],
+				isFull: false
+			}
 		};
 
 		const result = await estimator.estimate(tripRequest);
@@ -292,6 +352,10 @@ describe("TrainTicketEstimator", () => {
 				to: "Lyon",
 				when: futureDateFortyDay,
 			},
+			trainDetails: {
+				seats: [],
+				isFull: false
+			}
 		};
 
 		const ticketPrice = totalPriceFor2Tickets - (PRICE * 0.2 * 2);
@@ -309,6 +373,10 @@ describe("TrainTicketEstimator", () => {
 				to: "Lyon",
 				when: futureDateFortyDay,
 			},
+			trainDetails: {
+				seats: [],
+				isFull: false
+			}
 		};
 		const priceAfterDiscount = PRICE - (PRICE * 0.10);
 		const result = await estimator.estimate(tripRequest);
