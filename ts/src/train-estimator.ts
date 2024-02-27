@@ -1,8 +1,11 @@
-import { ApiException, DiscountCard, InvalidTripInputException, Passenger, TripRequest } from "./model/trip.request";
+import { ApiException, DiscountCard, InvalidTripInputException, Passenger, TrainDetails, TripRequest } from "./model/trip.request";
 
 export class TrainTicketEstimator {
     
-	getAvailableSeats(trainDetails: { seats: { number: number; isAvailable: boolean }[] }) {
+	getAvailableSeats(trainDetails: TrainDetails) {
+        if(trainDetails.isFull) {
+            throw new InvalidTripInputException("Train is full");
+        }
 		return trainDetails.seats.filter((seat) => seat.isAvailable).length;
 	}
 

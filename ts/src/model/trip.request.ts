@@ -26,6 +26,13 @@ export class InvalidTripInputException extends Error {
     }
 }
 
+export class InvalidTrainSeatException extends Error {
+    constructor() {
+        super("Train is full");
+    }
+
+}
+
 export class ApiException extends Error {
     constructor() {
         super("Api error");

@@ -391,10 +391,25 @@ describe("TrainTicketEstimator", () => {
 				{ number: 3, isAvailable: true },
 				{ number: 4, isAvailable: false },
 				{ number: 5, isAvailable: true },
-			]
+			],
+			isFull: false
 		}
 		const result = estimator.getAvailableSeats(trainDetails);
 		expect(result).toBe(3);
+	})
+
+	it('should throw an error when the train is full', () => {
+		const trainDetails = {
+			seats: [
+				{ number: 1, isAvailable: false },
+				{ number: 2, isAvailable: false },
+				{ number: 3, isAvailable: false },
+				{ number: 4, isAvailable: false },
+				{ number: 5, isAvailable: false },
+			],
+			isFull: true
+		}
+		expect(() => estimator.getAvailableSeats(trainDetails)).toThrow('Train is full');
 	})
 });
 
