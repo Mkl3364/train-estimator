@@ -215,7 +215,7 @@ describe("TrainTicketEstimator", () => {
 		expect(result).toBe(futurePrice);
 	});
 
-	it("Train ticket date is between 5 and 30 days (20 days)", async () => {
+	it("Train ticket date is between 5 and 30 days", async () => {
 		const tripRequest: TripRequest = {
 			passengers: [{ age: 30, discounts: [] }],
 			details: {
