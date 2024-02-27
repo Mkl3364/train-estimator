@@ -20,7 +20,7 @@ export class TrainTicketEstimator {
 
         const ticketPrice = await this.fetchTicketApi(trainDetails);
 
-        let totalTicketPrice = this.calculateTotalPrice(passengers, ticketPrice, trainDetails);
+        let totalTicketPrice = this.calculateTotalPrice(ticketPrice, trainDetails);
 
         if (passengers.length == 2) {
             let couple = false;
@@ -117,7 +117,8 @@ export class TrainTicketEstimator {
         return tmp;
     }
 
-    calculateTotalPrice(passengers: Passenger[], ticketPrice: number, trainDetails: TripRequest) {
+    calculateTotalPrice(ticketPrice: number, trainDetails: TripRequest) {
+        const { passengers } = trainDetails;
         let total = 0;
         for (let i = 0; i < passengers.length; i++) {
             const tmp = this.calculateTicketPrice(passengers[i], ticketPrice, trainDetails);
