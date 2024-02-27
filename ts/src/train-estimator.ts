@@ -119,11 +119,11 @@ export class TrainTicketEstimator {
 
     calculateTotalPrice(ticketPrice: number, trainDetails: TripRequest) {
         const { passengers } = trainDetails;
-        let total = 0;
-        for (let i = 0; i < passengers.length; i++) {
-            const tmp = this.calculateTicketPrice(passengers[i], ticketPrice, trainDetails);
-            total += tmp;
-        }
-        return total;
+        
+        return passengers.reduce((total, passenger) => {
+            const unitPriceTicket = this.calculateTicketPrice(passenger, ticketPrice, trainDetails);
+
+            return total + unitPriceTicket;
+        }, 0)
     }
 }
