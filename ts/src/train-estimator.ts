@@ -1,6 +1,10 @@
 import { ApiException, DiscountCard, InvalidTripInputException, Passenger, TripRequest } from "./model/trip.request";
 
 export class TrainTicketEstimator {
+    
+	getAvailableSeats(trainDetails: { seats: { number: number; isAvailable: boolean }[] }) {
+		return trainDetails.seats.filter((seat) => seat.isAvailable).length;
+	}
 
     async estimate(trainDetails: TripRequest): Promise<number> {
         const { details, passengers } = trainDetails;
@@ -110,6 +114,13 @@ export class TrainTicketEstimator {
     
         if (passenger.discounts.includes(DiscountCard.TrainStroke)) {
             return 1;
+        }
+
+        const sixHoursBeforeDeparture = new Date(tripStartDate.getTime() - 6 * 60 * 60 * 1000);
+
+        if (currentDate.getTime() >= sixHoursBeforeDeparture.getTime() && currentDate.getTime() < tripStartDate.getTime()) {
+        this.getAvailableSeats(trainDetails.trainDetails)
+            intermediate -= ticketPrice * 0.2;
         }
     
         return intermediate;

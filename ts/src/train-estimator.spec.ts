@@ -314,5 +314,19 @@ describe("TrainTicketEstimator", () => {
 		const result = await estimator.estimate(tripRequest);
 		expect(result).toBe(priceAfterDiscount);
 	})
+
+	it('should calculate the left seat number available on a train trip', () => {
+		const trainDetails = {
+			seats: [
+				{ number: 1, isAvailable: true },
+				{ number: 2, isAvailable: false },
+				{ number: 3, isAvailable: true },
+				{ number: 4, isAvailable: false },
+				{ number: 5, isAvailable: true },
+			]
+		}
+		const result = estimator.getAvailableSeats(trainDetails);
+		expect(result).toBe(3);
+	})
 });
 
