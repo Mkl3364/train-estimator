@@ -70,7 +70,7 @@ export class TrainTicketEstimator {
     }
 
     calculateTicketPrice(passenger: Passenger, ticketPrice: number, trainDetails: TripRequest) {
-        let tmp = ticketPrice;
+        let intermediate = ticketPrice;
     
         if (passenger.age < 0) {
             throw new InvalidTripInputException("Age is invalid");
@@ -80,31 +80,29 @@ export class TrainTicketEstimator {
             return 0;
         }
     
-        // Seniors
         if (passenger.age <= 17) {
-            tmp = ticketPrice * 0.6;
+            intermediate = ticketPrice * 0.6;
         } else if (passenger.age >= 70) {
-            tmp = ticketPrice * 0.8;
+            intermediate = ticketPrice * 0.8;
             if (passenger.discounts.includes(DiscountCard.Senior)) {
-                tmp -= ticketPrice * 0.2;
+                intermediate -= ticketPrice * 0.2;
             }
         } else {
-            tmp = ticketPrice * 1.2;
+            intermediate = ticketPrice * 1.2;
         }
     
         const currentDate = new Date();
-        if (trainDetails.details.when.getTime() >= currentDate.setDate(currentDate.getDate() + 30)) {
-            tmp -= ticketPrice * 0.2;
-        } else if (trainDetails.details.when.getTime() > currentDate.setDate(currentDate.getDate() - 30 + 5)) {
-            const date1 = trainDetails.details.when;
-            const date2 = new Date();
-            const diff = Math.abs(date1.getTime() - date2.getTime());
-            const diffDays = Math.ceil(diff / (1000 * 3600 * 24));
-    
-            tmp += (20 - diffDays) * 0.02 * ticketPrice;
+        const tripStartDate = trainDetails.details.when;
+        const daysDifference = Math.ceil((tripStartDate.getTime() - currentDate.getTime()) / (1000 * 3600 * 24));
+
+        if (daysDifference >= 30) {
+            intermediate -= ticketPrice * 0.2;
+        } else if (daysDifference > 5) {
+            intermediate += (20 - daysDifference) * 0.02 * ticketPrice;
         } else {
-            tmp += ticketPrice;
+            intermediate += ticketPrice;
         }
+
     
         if (passenger.age > 0 && passenger.age < 4) {
             return 9;
@@ -114,7 +112,7 @@ export class TrainTicketEstimator {
             return 1;
         }
     
-        return tmp;
+        return intermediate;
     }
 
     calculateTotalPrice(ticketPrice: number, trainDetails: TripRequest) {
