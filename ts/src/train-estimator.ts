@@ -20,16 +20,16 @@ export class TrainTicketEstimator {
         }
 
         // TODO USE THIS LINE AT THE END
-        const b = (await(await fetch(`https://sncftrenitaliadb.com/api/train/estimate/price?from=${trainDetails.details.from}&to=${trainDetails.details.to}&date=${trainDetails.details.when}`)).json())?.price || -1;
+        const basePrice = (await(await fetch(`https://sncftrenitaliadb.com/api/train/estimate/price?from=${trainDetails.details.from}&to=${trainDetails.details.to}&date=${trainDetails.details.when}`)).json())?.price || -1;
 
 
-        if (b === -1) {
+        if (basePrice === -1) {
             throw new ApiException();
         }
 
         const pasngers = trainDetails.passengers;
         let tot = 0;
-        let tmp = b;
+        let tmp = basePrice;
         for (let i=0;i<pasngers.length;i++) {
 
             if (pasngers[i].age < 0) {
@@ -40,19 +40,19 @@ export class TrainTicketEstimator {
             }
             // Seniors
             else if (pasngers[i].age <= 17) {
-            tmp = b* 0.6;
+            tmp = basePrice* 0.6;
             } else if(pasngers[i].age >= 70) {
-                tmp = b * 0.8;
+                tmp = basePrice * 0.8;
                 if (pasngers[i].discounts.includes(DiscountCard.Senior)) {
-                    tmp -= b * 0.2;
+                    tmp -= basePrice * 0.2;
                 }
             } else {
-                tmp = b*1.2;
+                tmp = basePrice*1.2;
             }
 
             const d = new Date();
             if (trainDetails.details.when.getTime() >= d.setDate(d.getDate() +30)) {
-                tmp -= b * 0.2;
+                tmp -= basePrice * 0.2;
             } else if (trainDetails.details.when.getTime() > d.setDate(d.getDate() -30 + 5)) {
                 const date1 = trainDetails.details.when;
                 const date2 = new Date();
@@ -60,9 +60,9 @@ export class TrainTicketEstimator {
                 var diff = Math.abs(date1.getTime() - date2.getTime());
                 var diffDays = Math.ceil(diff / (1000 * 3600 * 24));
 
-                tmp += (20 - diffDays) * 0.02 * b; // I tried. it works. I don't know why.
+                tmp += (20 - diffDays) * 0.02 * basePrice; // I tried. it works. I don't know why.
             } else {
-                tmp += b;
+                tmp += basePrice;
             }
 
             if (pasngers[i].age > 0 && pasngers[i].age < 4) {
@@ -74,7 +74,7 @@ export class TrainTicketEstimator {
             }
 
             tot += tmp;
-            tmp = b;
+            tmp = basePrice;
         }
 
         if (pasngers.length == 2) {
@@ -89,7 +89,7 @@ export class TrainTicketEstimator {
                 }
             }
             if (cp && !mn) {
-                tot -= b * 0.2 * 2;
+                tot -= basePrice * 0.2 * 2;
             }
         }
 
@@ -105,7 +105,7 @@ export class TrainTicketEstimator {
                 }
             }
             if (cp && !mn) {
-                tot -= b * 0.1;
+                tot -= basePrice * 0.1;
             }
         }
 
