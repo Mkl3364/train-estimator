@@ -27,23 +27,23 @@ export class TrainTicketEstimator {
             throw new ApiException();
         }
 
-        const pasngers = trainDetails.passengers;
+        const passenger = trainDetails.passengers;
         let tot = 0;
         let tmp = basePrice;
-        for (let i=0;i<pasngers.length;i++) {
+        for (let i=0;i<passenger.length;i++) {
 
-            if (pasngers[i].age < 0) {
+            if (passenger[i].age < 0) {
                 throw new InvalidTripInputException("Age is invalid");
             }
-            if (pasngers[i].age < 1) {
+            if (passenger[i].age < 1) {
                 continue;
             }
             // Seniors
-            else if (pasngers[i].age <= 17) {
+            else if (passenger[i].age <= 17) {
             tmp = basePrice* 0.6;
-            } else if(pasngers[i].age >= 70) {
+            } else if(passenger[i].age >= 70) {
                 tmp = basePrice * 0.8;
-                if (pasngers[i].discounts.includes(DiscountCard.Senior)) {
+                if (passenger[i].discounts.includes(DiscountCard.Senior)) {
                     tmp -= basePrice * 0.2;
                 }
             } else {
@@ -65,11 +65,11 @@ export class TrainTicketEstimator {
                 tmp += basePrice;
             }
 
-            if (pasngers[i].age > 0 && pasngers[i].age < 4) {
+            if (passenger[i].age > 0 && passenger[i].age < 4) {
                 tmp = 9;
             }
 
-            if (pasngers[i].discounts.includes(DiscountCard.TrainStroke)) {
+            if (passenger[i].discounts.includes(DiscountCard.TrainStroke)) {
                 tmp = 1;
             }
 
@@ -77,14 +77,14 @@ export class TrainTicketEstimator {
             tmp = basePrice;
         }
 
-        if (pasngers.length == 2) {
+        if (passenger.length == 2) {
             let cp = false;
             let mn = false;
-            for (let i=0;i<pasngers.length;i++) {
-                if (pasngers[i].discounts.includes(DiscountCard.Couple)) {
+            for (let i=0;i<passenger.length;i++) {
+                if (passenger[i].discounts.includes(DiscountCard.Couple)) {
                     cp = true;
                 }
-                if (pasngers[i].age < 18) {
+                if (passenger[i].age < 18) {
                     mn = true;
                 }
             }
@@ -93,14 +93,14 @@ export class TrainTicketEstimator {
             }
         }
 
-        if (pasngers.length == 1) {
+        if (passenger.length == 1) {
             let cp = false;
             let mn = false;
-            for (let i=0;i<pasngers.length;i++) {
-                if (pasngers[i].discounts.includes(DiscountCard.HalfCouple)) {
+            for (let i=0;i<passenger.length;i++) {
+                if (passenger[i].discounts.includes(DiscountCard.HalfCouple)) {
                     cp = true;
                 }
-                if (pasngers[i].age < 18) {
+                if (passenger[i].age < 18) {
                     mn = true;
                 }
             }
