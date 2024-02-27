@@ -42,10 +42,10 @@ export class TrainTicketEstimator {
                 tmp = ticketPrice * 1.2;
             }
 
-            const d = new Date();
-            if (trainDetails.details.when.getTime() >= d.setDate(d.getDate() + 30)) {
+            const currentDate = new Date();
+            if (trainDetails.details.when.getTime() >= currentDate.setDate(currentDate.getDate() + 30)) {
                 tmp -= ticketPrice * 0.2;
-            } else if (trainDetails.details.when.getTime() > d.setDate(d.getDate() - 30 + 5)) {
+            } else if (trainDetails.details.when.getTime() > currentDate.setDate(currentDate.getDate() - 30 + 5)) {
                 const date1 = trainDetails.details.when;
                 const date2 = new Date();
                 //https://stackoverflow.com/questions/43735678/typescript-get-difference-between-two-dates-in-days
