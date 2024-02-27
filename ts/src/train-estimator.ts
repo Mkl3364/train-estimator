@@ -20,7 +20,7 @@ export class TrainTicketEstimator {
 
         const ticketPrice = await this.fetchTicketApi(trainDetails);
 
-        let tot = this.calculateTotalPrice(passengers, ticketPrice, trainDetails);
+        let totalTicketPrice = this.calculateTotalPrice(passengers, ticketPrice, trainDetails);
 
         if (passengers.length == 2) {
             let couple = false;
@@ -34,27 +34,27 @@ export class TrainTicketEstimator {
                 }
             }
             if (couple && !minor) {
-                tot -= ticketPrice * 0.2 * 2;
+                totalTicketPrice -= ticketPrice * 0.2 * 2;
             }
         }
 
         if (passengers.length == 1) {
-            let cp = false;
-            let mn = false;
+            let halfCouple = false;
+            let minor = false;
             for (let i = 0; i < passengers.length; i++) {
                 if (passengers[i].discounts.includes(DiscountCard.HalfCouple)) {
-                    cp = true;
+                    halfCouple = true;
                 }
                 if (passengers[i].age < 18) {
-                    mn = true;
+                    minor = true;
                 }
             }
-            if (cp && !mn) {
-                tot -= ticketPrice * 0.1;
+            if (halfCouple && !minor) {
+                totalTicketPrice -= ticketPrice * 0.1;
             }
         }
 
-        return tot;
+        return totalTicketPrice;
     }
 
     private async fetchTicketApi(trainDetails: Pick<TripRequest, 'details'>): Promise<number> {
