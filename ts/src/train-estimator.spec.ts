@@ -20,6 +20,8 @@ describe("TrainTicketEstimator", () => {
 	futureDateTwentyDay.setDate(futureDateTwentyDay.getDate() + 20);
 	const futureDateFiveDay = new Date();
 	futureDateFiveDay.setDate(futureDateFiveDay.getDate() + 4);
+	const futureDateSixHour = new Date();
+	futureDateSixHour.setHours(futureDateSixHour.getHours() + 6);
 
 	global.fetch = jest.fn().mockResolvedValue({
 		json: () => Promise.resolve({ price: PRICE }),
@@ -410,6 +412,30 @@ describe("TrainTicketEstimator", () => {
 			isFull: true
 		}
 		expect(() => estimator.getAvailableSeats(trainDetails)).toThrow('Train is full');
+	})
+
+	it('shoud apply a discount of 20% for passengers with a ticket bought 6 hours before the train departure', async () => {
+		const tripRequest: TripRequest = {
+			passengers: [{ age: 30, discounts: [] }],
+			details: {
+				from: "Paris",
+				to: "Lyon",
+				when: futureDateSixHour,
+			},
+			trainDetails: {
+				seats: [
+					{ number: 1, isAvailable: true },
+					{ number: 2, isAvailable: true },
+					{ number: 3, isAvailable: true },
+					{ number: 4, isAvailable: true },
+					{ number: 5, isAvailable: true },
+				],
+				isFull: false
+			}
+		};
+		const priceAfterDiscount = PRICE - (PRICE * 0.2);
+		const result = await estimator.estimate(tripRequest);
+		expect(result).toBe(priceAfterDiscount);
 	})
 });
 
