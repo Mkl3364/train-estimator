@@ -75,10 +75,10 @@ export class TrainTicketEstimator {
 			} else if (
 				trainDetails.details.when.getTime() > date.setDate(date.getDate() - 30 + 5)
 			) {
-				const date1 = trainDetails.details.when;
-				const date2 = new Date();
+				const trainDate = trainDetails.details.when;
+				const currentDate = new Date();
 				//https://stackoverflow.com/questions/43735678/typescript-get-difference-between-two-dates-in-days
-				const diff = Math.abs(date1.getTime() - date2.getTime());
+				const diff = Math.abs(trainDate.getTime() - currentDate.getTime());
 				const diffDays = Math.ceil(diff / (1000 * 3600 * 24));
 
 				passengerPrice += (20 - diffDays) * 0.02 * basePrice; // I tried. it works. I don't know why.
