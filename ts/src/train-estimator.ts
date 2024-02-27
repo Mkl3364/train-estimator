@@ -49,7 +49,7 @@ export class TrainTicketEstimator {
 
 		const passengers = trainDetails.passengers;
 		let totalPrice = 0;
-		let tmp = basePrice;
+		let passengerPrice = basePrice;
 		for (let i = 0; i < passengers.length; i++) {
 			if (passengers[i].age < 0) {
 				throw new InvalidTripInputException("Age is invalid");
@@ -59,19 +59,19 @@ export class TrainTicketEstimator {
 			}
 			// Seniors
 			else if (passengers[i].age <= 17) {
-				tmp = basePrice * 0.6;
+				passengerPrice = basePrice * 0.6;
 			} else if (passengers[i].age >= 70) {
-				tmp = basePrice * 0.8;
+				passengerPrice = basePrice * 0.8;
 				if (passengers[i].discounts.includes(DiscountCard.Senior)) {
-					tmp -= basePrice * 0.2;
+					passengerPrice -= basePrice * 0.2;
 				}
 			} else {
-				tmp = basePrice * 1.2;
+				passengerPrice = basePrice * 1.2;
 			}
 
 			const d = new Date();
 			if (trainDetails.details.when.getTime() >= d.setDate(d.getDate() + 30)) {
-				tmp -= basePrice * 0.2;
+				passengerPrice -= basePrice * 0.2;
 			} else if (
 				trainDetails.details.when.getTime() > d.setDate(d.getDate() - 30 + 5)
 			) {
@@ -81,21 +81,21 @@ export class TrainTicketEstimator {
 				const diff = Math.abs(date1.getTime() - date2.getTime());
 				const diffDays = Math.ceil(diff / (1000 * 3600 * 24));
 
-				tmp += (20 - diffDays) * 0.02 * basePrice; // I tried. it works. I don't know why.
+				passengerPrice += (20 - diffDays) * 0.02 * basePrice; // I tried. it works. I don't know why.
 			} else {
-				tmp += basePrice;
+				passengerPrice += basePrice;
 			}
 
 			if (passengers[i].age > 0 && passengers[i].age < 4) {
-				tmp = 9;
+				passengerPrice = 9;
 			}
 
 			if (passengers[i].discounts.includes(DiscountCard.TrainStroke)) {
-				tmp = 1;
+				passengerPrice = 1;
 			}
 
-			totalPrice += tmp;
-			tmp = basePrice;
+			totalPrice += passengerPrice;
+			passengerPrice = basePrice;
 		}
 
 		if (passengers.length == 2) {
