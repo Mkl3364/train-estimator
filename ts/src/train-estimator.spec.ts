@@ -468,7 +468,7 @@ describe("TrainTicketEstimator", () => {
 			details: {
 				from: "Paris",
 				to: "Lyon",
-				when: new Date(),
+				when: futureDateFortyDay,
 			},
 			trainDetails: {
 				seats: [],
@@ -476,7 +476,7 @@ describe("TrainTicketEstimator", () => {
 			}
 		}
 
-		const priceAfterDiscount = PRICE - (PRICE * 0.3 * 3)
+		const priceAfterDiscount = (PRICE - (PRICE * 0.3)) * 3
 
 		const result = await estimator.estimate(tripRequest);
 		expect(result).toBe(priceAfterDiscount);
