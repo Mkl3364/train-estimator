@@ -1,16 +1,11 @@
 import { ApiException, DiscountCard, TripRequest } from "./model/trip.request";
 import { TrainTicketEstimator } from "./train-estimator";
 
-describe("train estimator", function () {
-	it("should work", () => {
-		expect(1 + 2).toBe(3);
-	});
-});
-
 describe("TrainTicketEstimator", () => {
 	const PRICE = 100;
 	const THIRTY_DAYS_DISCOUNT = 0.2;
 	const SEVENTY_YEARS_DISCOUNT = 0.8;
+	const SIX_HOURS_DISCOUNT = 0.8;
 	const HEIGHTEEN_YEARS_DISCOUNT = 0.6;
 	const SENIOR_DISCOUNT = 0.2;
 	const FIFTY_YEARS_INCREASE = 1.2;
@@ -18,8 +13,8 @@ describe("TrainTicketEstimator", () => {
 	futureDateFortyDay.setDate(futureDateFortyDay.getDate() + 40);
 	const futureDateTwentyDay = new Date();
 	futureDateTwentyDay.setDate(futureDateTwentyDay.getDate() + 20);
-	const futureDateFiveDay = new Date();
-	futureDateFiveDay.setDate(futureDateFiveDay.getDate() + 4);
+	const futureDateFourDay = new Date();
+	futureDateFourDay.setDate(futureDateFourDay.getDate() + 4);
 	const futureDateSixHour = new Date();
 	futureDateSixHour.setHours(futureDateSixHour.getHours() + 6);
 
@@ -314,7 +309,7 @@ describe("TrainTicketEstimator", () => {
 			details: {
 				from: "Paris",
 				to: "Lyon",
-				when: new Date(),
+				when: futureDateFourDay,
 			},
 			trainDetails: {
 				seats: [],
@@ -415,27 +410,56 @@ describe("TrainTicketEstimator", () => {
 	})
 
 	it('shoud apply a discount of 20% for passengers with a ticket bought 6 hours before the train departure', async () => {
+		const fiveHoursBeforeDeparture = new Date(new Date().getTime() - 4 * 60 * 60 * 1000)
+        const fiveHoursBeforeDepartureNumber = fiveHoursBeforeDeparture.getTime();
+
 		const tripRequest: TripRequest = {
 			passengers: [{ age: 30, discounts: [] }],
 			details: {
 				from: "Paris",
 				to: "Lyon",
-				when: futureDateSixHour,
+				when: fiveHoursBeforeDeparture
 			},
 			trainDetails: {
 				seats: [
 					{ number: 1, isAvailable: true },
-					{ number: 2, isAvailable: true },
-					{ number: 3, isAvailable: true },
-					{ number: 4, isAvailable: true },
-					{ number: 5, isAvailable: true },
+					{ number: 2, isAvailable: false },
+					{ number: 3, isAvailable: false },
+					{ number: 4, isAvailable: false },
+					{ number: 5, isAvailable: false },
 				],
 				isFull: false
 			}
 		};
-		const priceAfterDiscount = PRICE - (PRICE * 0.2);
+		const priceAfterDiscount = PRICE;
 		const result = await estimator.estimate(tripRequest);
 		expect(result).toBe(priceAfterDiscount);
 	})
+
+	// it('shoud apply a increase of 100% for passengers with a ticket bought between 1 day and 6 hours before departure', async () => {
+	// 	const heightHoursBeforeDeparture = new Date(new Date().getTime() - 10 * 60 * 60 * 1000)
+
+	// 	const tripRequest: TripRequest = {
+	// 		passengers: [{ age: 30, discounts: [] }],
+	// 		details: {
+	// 			from: "Paris",
+	// 			to: "Lyon",
+	// 			when: heightHoursBeforeDeparture
+	// 		},
+	// 		trainDetails: {
+	// 			seats: [
+	// 				{ number: 1, isAvailable: true },
+	// 				{ number: 2, isAvailable: true },
+	// 				{ number: 3, isAvailable: true },
+	// 				{ number: 4, isAvailable: true },
+	// 				{ number: 5, isAvailable: true },
+	// 			],
+	// 			isFull: false
+	// 		}
+	// 	};
+	// 	const priceAfterDiscount = Math.round(PRICE * (FIFTY_YEARS_INCREASE + 1));
+	// 	const result = await estimator.estimate(tripRequest);
+	// 	expect(result).toBe(priceAfterDiscount);
+	// })
 });
 

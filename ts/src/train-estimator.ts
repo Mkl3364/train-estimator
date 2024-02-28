@@ -1,13 +1,13 @@
 import { ApiException, DiscountCard, InvalidTripInputException, Passenger, TrainDetails, TripRequest } from "./model/trip.request";
 
 export class TrainTicketEstimator {
-    
-	getAvailableSeats(trainDetails: TrainDetails) {
-        if(trainDetails.isFull) {
+
+    getAvailableSeats(trainDetails: TrainDetails): number {
+        if (trainDetails.isFull) {
             throw new InvalidTripInputException("Train is full");
         }
-		return trainDetails.seats.filter((seat) => seat.isAvailable).length;
-	}
+        return trainDetails.seats.filter((seat) => seat.isAvailable).length;
+    }
 
     async estimate(trainDetails: TripRequest): Promise<number> {
         const { details, passengers } = trainDetails;
@@ -19,7 +19,7 @@ export class TrainTicketEstimator {
         if (!from.trim().length) throw new InvalidTripInputException("Start city is invalid")
 
         if (!to.trim().length) throw new InvalidTripInputException("Destination city is invalid");
-        
+
 
         if (when < new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate(), 0, 0, 0)) {
             throw new InvalidTripInputException("Date is invalid");
@@ -78,15 +78,15 @@ export class TrainTicketEstimator {
 
     calculateTicketPrice(passenger: Passenger, ticketPrice: number, trainDetails: TripRequest) {
         let intermediate = ticketPrice;
-    
+
         if (passenger.age < 0) {
             throw new InvalidTripInputException("Age is invalid");
         }
-    
+
         if (passenger.age < 1) {
             return 0;
         }
-    
+
         if (passenger.age <= 17) {
             intermediate = ticketPrice * 0.6;
         } else if (passenger.age >= 70) {
@@ -97,41 +97,43 @@ export class TrainTicketEstimator {
         } else {
             intermediate = ticketPrice * 1.2;
         }
-    
+
         const currentDate = new Date();
         const tripStartDate = trainDetails.details.when;
         const daysDifference = Math.ceil((tripStartDate.getTime() - currentDate.getTime()) / (1000 * 3600 * 24));
+        const sixHoursBeforeDeparture = new Date(tripStartDate.getTime() - 6 * 60 * 60 * 1000);
 
         if (daysDifference >= 30) {
             intermediate -= ticketPrice * 0.2;
-        } else if (daysDifference > 5) {
-            intermediate += (20 - daysDifference) * 0.02 * ticketPrice;
-        } else {
-            intermediate += ticketPrice;
         }
-
-    
+        else if (daysDifference > 5) {
+            intermediate += (20 - daysDifference) * 0.02 * ticketPrice;
+        }
+        else if (daysDifference < 1) {
+            if (this.getAvailableSeats(trainDetails.trainDetails) !== 0) {
+                if (tripStartDate.getTime() > sixHoursBeforeDeparture.getTime()) {
+                    intermediate -= ticketPrice * 0.2;
+                }
+            }
+        }
+        else {
+            intermediate += ticketPrice
+        }
+        
         if (passenger.age > 0 && passenger.age < 4) {
             return 9;
         }
-    
+
         if (passenger.discounts.includes(DiscountCard.TrainStroke)) {
             return 1;
         }
 
-        const sixHoursBeforeDeparture = new Date(tripStartDate.getTime() - 6 * 60 * 60 * 1000);
-
-        if (currentDate.getTime() >= sixHoursBeforeDeparture.getTime() && currentDate.getTime() < tripStartDate.getTime()) {
-        this.getAvailableSeats(trainDetails.trainDetails)
-            intermediate -= ticketPrice * 0.2;
-        }
-    
         return intermediate;
     }
 
     calculateTotalPrice(ticketPrice: number, trainDetails: TripRequest) {
         const { passengers } = trainDetails;
-        
+
         return passengers.reduce((total, passenger) => {
             const unitPriceTicket = this.calculateTicketPrice(passenger, ticketPrice, trainDetails);
 
