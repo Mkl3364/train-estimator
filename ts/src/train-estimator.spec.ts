@@ -281,25 +281,25 @@ describe("TrainTicketEstimator", () => {
 		const diff = Math.abs(ticketDate.getTime() - currentDate.getTime());
 		const diffDays = Math.ceil(diff / (1000 * 3600 * 24));
 
-		let ticketPrice;
+		let baseTicketPrice;
 
 		if (diffDays >= 5 && diffDays <= 29) {
 			// Apply 2% daily increase for 25 days
-			ticketPrice = PRICE * Math.pow(1.02, 25);
+			baseTicketPrice = PRICE * Math.pow(1.02, 25);
 		} else if (diffDays === 30) {
 			// Apply -18% increase for the 29th day
-			ticketPrice = PRICE * 0.82;
+			baseTicketPrice = PRICE * 0.82;
 		} else if (diffDays === 4) {
 			// Apply +30% increase for the 5th day
-			ticketPrice = PRICE * 1.30;
+			baseTicketPrice = PRICE * 1.30;
 		} else {
 			// Default calculation if outside the specified range
-			ticketPrice = PRICE;
+			baseTicketPrice = PRICE;
 		}
 
 		const result = await estimator.estimate(tripRequest);
 
-		expect(result).toBe(ticketPrice);
+		expect(result).toBe(baseTicketPrice);
 	});
 
 	it("Train date is 5days or less in the future", async () => {
@@ -355,11 +355,11 @@ describe("TrainTicketEstimator", () => {
 			}
 		};
 
-		const ticketPrice = totalPriceFor2Tickets - (PRICE * 0.2 * 2);
+		const baseTicketPrice = totalPriceFor2Tickets - (PRICE * 0.2 * 2);
 
 		const result = await estimator.estimate(tripRequest);
 
-		expect(result).toBe(ticketPrice);
+		expect(result).toBe(baseTicketPrice);
 	})
 
 	it('should apply 10 % discount for the half couple card', async () => {
@@ -411,7 +411,7 @@ describe("TrainTicketEstimator", () => {
 
 	it('shoud apply a discount of 20% for passengers with a ticket bought 6 hours before the train departure', async () => {
 		const fiveHoursBeforeDeparture = new Date(new Date().getTime() - 4 * 60 * 60 * 1000)
-        const fiveHoursBeforeDepartureNumber = fiveHoursBeforeDeparture.getTime();
+		const fiveHoursBeforeDepartureNumber = fiveHoursBeforeDeparture.getTime();
 
 		const tripRequest: TripRequest = {
 			passengers: [{ age: 30, discounts: [], lastName: 'Bozon' }],

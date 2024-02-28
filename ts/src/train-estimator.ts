@@ -27,11 +27,11 @@ export class TrainTicketEstimator {
             throw new InvalidTripInputException("Date is invalid");
         }
 
-        const ticketPrice = await this.fetchTicketApi(trainDetails);
+        const baseTicketPrice = await this.fetchTicketApi(trainDetails);
 
-        const totalTicketPrice = this.calculateTotalPrice(ticketPrice, trainDetails);
+        const totalbaseTicketPrice = this.calculateTotalPrice(baseTicketPrice, trainDetails);
 
-        return totalTicketPrice;
+        return totalbaseTicketPrice;
     }
 
     private async fetchTicketApi(trainDetails: Pick<TripRequest, 'details'>): Promise<number> {
@@ -46,9 +46,8 @@ export class TrainTicketEstimator {
         }
     }
 
-    calculateTicketPrice(passenger: Passenger, ticketPrice: number, trainDetails: TripRequest) {
-        let intermediate = ticketPrice;
-
+    calculatebaseTicketPrice(passenger: Passenger, baseTicketPrice: number, trainDetails: TripRequest) {
+        let calculatedTicketPrice = baseTicketPrice;
         if (passenger.age < 0) {
             throw new InvalidTripInputException("Age is invalid");
         }
@@ -57,19 +56,19 @@ export class TrainTicketEstimator {
             throw new InvalidTripInputException("Age is invalid");
         }
 
-        intermediate = this.calculateTicketDependingAge(passenger, ticketPrice);
+        calculatedTicketPrice = this.calculateTicketDependingAge(passenger, baseTicketPrice);
 
         if (trainDetails.passengers.length == 2) {
-            intermediate = this.calculateCoupleDiscount(trainDetails, ticketPrice);
+            calculatedTicketPrice = this.calculateCoupleDiscount(trainDetails, baseTicketPrice);
         }
 
         if (trainDetails.passengers.length == 1) {
-            intermediate = this.calculateHalfCoupleDiscount(trainDetails, intermediate, ticketPrice);
+            calculatedTicketPrice = this.calculateHalfCoupleDiscount(trainDetails, calculatedTicketPrice, baseTicketPrice);
         }
 
 
-        intermediate = this.calculateDaysDifference(trainDetails, intermediate, ticketPrice);
-        
+        calculatedTicketPrice = this.calculateDaysDifference(trainDetails, calculatedTicketPrice, baseTicketPrice);
+
         if (passenger.age > 0 && passenger.age < 4) {
             return YOUNG_PASSENGER_PRICE;
         }
@@ -79,58 +78,58 @@ export class TrainTicketEstimator {
         }
 
         if (passenger.discounts.includes(DiscountCard.Family)) {
-            intermediate = this.calculateFamilyDiscount(ticketPrice);
+            calculatedTicketPrice = this.calculateFamilyDiscount(baseTicketPrice);
         }
 
-        // const familyCardDiscount = this.calculateFamilyCardDiscount(trainDetails.passengers, ticketPrice);
+        // const familyCardDiscount = this.calculateFamilyCardDiscount(trainDetails.passengers, baseTicketPrice);
         // if (familyCardDiscount) {
-        //     intermediate = familyCardDiscount;
+        //     calculatedTicketPrice = familyCardDiscount;
         // }
 
-        return intermediate;
+        return calculatedTicketPrice;
     }
 
-    private calculateTicketDependingAge(passenger: Passenger, ticketPrice: number) {
+    private calculateTicketDependingAge(passenger: Passenger, baseTicketPrice: number) {
         if (passenger.age <= 17) {
-            ticketPrice = this.calculateMinorDiscount(ticketPrice);
+            baseTicketPrice = this.calculateMinorDiscount(baseTicketPrice);
         } else if (passenger.age >= 70) {
-            ticketPrice = this.calculateSeniorDiscount(ticketPrice, passenger);
+            baseTicketPrice = this.calculateSeniorDiscount(baseTicketPrice, passenger);
         } else {
-            ticketPrice = ticketPrice * 1.2;
+            baseTicketPrice = baseTicketPrice * 1.2;
         }
-        return ticketPrice;
+        return baseTicketPrice;
     }
 
-    private calculateFamilyDiscount(ticketPrice: number) {
-        return ticketPrice - (ticketPrice * 0.3);
+    private calculateFamilyDiscount(baseTicketPrice: number) {
+        return baseTicketPrice - (baseTicketPrice * 0.3);
     }
 
-    private calculateDaysDifference(trainDetails: TripRequest, intermediate: number, ticketPrice: number) {
+    private calculateDaysDifference(trainDetails: TripRequest, calculatedTicketPrice: number, baseTicketPrice: number) {
         const currentDate = new Date();
         const tripStartDate = trainDetails.details.when;
         const daysDifference = Math.ceil((tripStartDate.getTime() - currentDate.getTime()) / (1000 * 3600 * 24));
         const sixHoursBeforeDeparture = new Date(tripStartDate.getTime() - 6 * 60 * 60 * 1000);
 
         if (daysDifference >= 30) {
-            intermediate -= ticketPrice * 0.2;
+            calculatedTicketPrice -= baseTicketPrice * 0.2;
         }
         else if (daysDifference > 5) {
-            intermediate += (20 - daysDifference) * 0.02 * ticketPrice;
+            calculatedTicketPrice += (20 - daysDifference) * 0.02 * baseTicketPrice;
         }
         else if (daysDifference < 1) {
             if (this.getAvailableSeats(trainDetails.trainDetails) !== 0) {
                 if (tripStartDate.getTime() > sixHoursBeforeDeparture.getTime()) {
-                    intermediate -= ticketPrice * 0.2;
+                    calculatedTicketPrice -= baseTicketPrice * 0.2;
                 }
             }
         }
         else {
-            intermediate += ticketPrice;
+            calculatedTicketPrice += baseTicketPrice;
         }
-        return intermediate;
+        return calculatedTicketPrice;
     }
 
-    private calculateHalfCoupleDiscount(trainDetails: TripRequest, intermediate: number, ticketPrice: number) {
+    private calculateHalfCoupleDiscount(trainDetails: TripRequest, calculatedTicketPrice: number, baseTicketPrice: number) {
         let halfCouple = false;
         let minor = false;
         for (let i = 0; i < trainDetails.passengers.length; i++) {
@@ -142,12 +141,12 @@ export class TrainTicketEstimator {
             }
         }
         if (halfCouple && !minor) {
-            intermediate -= ticketPrice * 0.1;
+            calculatedTicketPrice -= baseTicketPrice * 0.1;
         }
-        return intermediate;
+        return calculatedTicketPrice;
     }
 
-    private calculateCoupleDiscount(trainDetails: TripRequest, ticketPrice: number) {
+    private calculateCoupleDiscount(trainDetails: TripRequest, baseTicketPrice: number) {
         let couple = false;
         let minor = false;
         for (let i = 0; i < trainDetails.passengers.length; i++) {
@@ -159,41 +158,41 @@ export class TrainTicketEstimator {
             }
         }
         if (couple && !minor) {
-            ticketPrice - ticketPrice * 0.2;
+            baseTicketPrice - baseTicketPrice * 0.2;
         }
-        return ticketPrice;
+        return baseTicketPrice;
     }
 
-    private calculateSeniorDiscount(ticketPrice: number, passenger: Passenger) {
-        const ageIncrease = ticketPrice * 0.8;
+    private calculateSeniorDiscount(baseTicketPrice: number, passenger: Passenger) {
+        const calculatedTicketPrice = baseTicketPrice * 0.8;
         if (passenger.discounts.includes(DiscountCard.Senior)) {
-            return (ticketPrice * 0.8) - (ticketPrice * 0.2);
+            return (baseTicketPrice * 0.8) - (baseTicketPrice * 0.2);
         }
-        return ageIncrease;
+        return calculatedTicketPrice;
     }
 
-    private calculateMinorDiscount(ticketPrice: number) {
-        return ticketPrice * 0.6;
+    private calculateMinorDiscount(baseTicketPrice: number) {
+        return baseTicketPrice * 0.6;
     }
 
-    calculateFamilyCardDiscount(passengers: Passenger[], ticketPrice: number): number | undefined {
+    calculateFamilyCardDiscount(passengers: Passenger[], baseTicketPrice: number): number | undefined {
         const lastNameSet = new Set<string>();
 
         for (const passenger of passengers) {
             if (passenger.lastName) {
                 if (lastNameSet.has(passenger.lastName)) {
-                    return ticketPrice - (ticketPrice * 0.3);
+                    return baseTicketPrice - (baseTicketPrice * 0.3);
                 }
                 lastNameSet.add(passenger.lastName);
             }
         }
     }
 
-    calculateTotalPrice(ticketPrice: number, trainDetails: TripRequest) {
+    calculateTotalPrice(baseTicketPrice: number, trainDetails: TripRequest) {
         const { passengers } = trainDetails;
 
         return passengers.reduce((total, passenger) => {
-            const unitPriceTicket = this.calculateTicketPrice(passenger, ticketPrice, trainDetails);
+            const unitPriceTicket = this.calculatebaseTicketPrice(passenger, baseTicketPrice, trainDetails);
 
             return total + unitPriceTicket;
         }, 0)
