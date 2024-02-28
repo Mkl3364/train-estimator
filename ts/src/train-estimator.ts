@@ -94,7 +94,7 @@ export class TrainTicketEstimator {
         if (passenger.age <= 17) {
             ticketPrice = this.calculateMinorDiscount(ticketPrice);
         } else if (passenger.age >= 70) {
-            ticketPrice = this.calculateSeniorDiscount(intermediate, ticketPrice, passenger);
+            ticketPrice = this.calculateSeniorDiscount(ticketPrice, passenger);
         } else {
             ticketPrice = ticketPrice * 1.2;
         }
@@ -164,12 +164,12 @@ export class TrainTicketEstimator {
         return ticketPrice;
     }
 
-    private calculateSeniorDiscount(intermediate: number, ticketPrice: number, passenger: Passenger) {
-        intermediate = ticketPrice * 0.8;
+    private calculateSeniorDiscount(ticketPrice: number, passenger: Passenger) {
+        const ageIncrease = ticketPrice * 0.8;
         if (passenger.discounts.includes(DiscountCard.Senior)) {
-            intermediate -= ticketPrice * 0.2;
+            return (ticketPrice * 0.8) - (ticketPrice * 0.2);
         }
-        return intermediate;
+        return ageIncrease;
     }
 
     private calculateMinorDiscount(ticketPrice: number) {
