@@ -57,7 +57,7 @@ export class TrainTicketEstimator {
             throw new InvalidTripInputException("Age is invalid");
         }
 
-        intermediate = this.calculateTicketDependingAge(intermediate, passenger, ticketPrice);
+        intermediate = this.calculateTicketDependingAge(passenger, ticketPrice);
 
         if (trainDetails.passengers.length == 2) {
             intermediate = this.calculateCoupleDiscount(trainDetails, ticketPrice);
@@ -90,7 +90,7 @@ export class TrainTicketEstimator {
         return intermediate;
     }
 
-    private calculateTicketDependingAge(intermediate: number, passenger: Passenger, ticketPrice: number) {
+    private calculateTicketDependingAge(passenger: Passenger, ticketPrice: number) {
         if (passenger.age <= 17) {
             ticketPrice = this.calculateMinorDiscount(ticketPrice);
         } else if (passenger.age >= 70) {
