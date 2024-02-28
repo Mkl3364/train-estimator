@@ -3,7 +3,7 @@ export class Passenger {
 }
 
 export class TripRequest {
-    constructor(readonly details: TripDetails, readonly passengers: Passenger[]){}
+    constructor(readonly details: TripDetails, readonly passengers: Passenger[], readonly trainDetails: TrainDetails){}
 }
 
 export class TripDetails {
@@ -11,10 +11,26 @@ export class TripDetails {
     }
 }
 
+export class Seat {
+    constructor(readonly number: number, readonly isAvailable: boolean) {}
+
+}
+
+export class TrainDetails {
+    constructor(readonly seats: Seat[], readonly isFull: boolean) {}
+}
+
 export class InvalidTripInputException extends Error {
     constructor(message: string) {
         super(message);
     }
+}
+
+export class InvalidTrainSeatException extends Error {
+    constructor() {
+        super("Train is full");
+    }
+
 }
 
 export class ApiException extends Error {
