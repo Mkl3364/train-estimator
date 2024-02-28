@@ -78,13 +78,8 @@ export class TrainTicketEstimator {
         }
 
         if (passenger.discounts.includes(DiscountCard.Family)) {
-            calculatedTicketPrice = this.calculateFamilyDiscount(baseTicketPrice);
+            calculatedTicketPrice = this.calculateFamilyDiscount(baseTicketPrice, calculatedTicketPrice, passenger);
         }
-
-        // const familyCardDiscount = this.calculateFamilyCardDiscount(trainDetails.passengers, baseTicketPrice);
-        // if (familyCardDiscount) {
-        //     calculatedTicketPrice = familyCardDiscount;
-        // }
 
         return calculatedTicketPrice;
     }
@@ -100,8 +95,13 @@ export class TrainTicketEstimator {
         return baseTicketPrice;
     }
 
-    private calculateFamilyDiscount(baseTicketPrice: number) {
-        return baseTicketPrice - (baseTicketPrice * 0.3);
+    private calculateFamilyDiscount(baseTicketPrice: number, calculatedTicketPrice: number, passenger: Passenger) {
+        if (passenger.lastName) {
+            // Apply a 30% discount if the passenger has a last name
+            calculatedTicketPrice -= baseTicketPrice * 0.3;
+        }
+    
+        return calculatedTicketPrice;
     }
 
     private calculateDaysDifference(trainDetails: TripRequest, calculatedTicketPrice: number, baseTicketPrice: number) {
@@ -173,19 +173,6 @@ export class TrainTicketEstimator {
 
     private calculateMinorDiscount(baseTicketPrice: number) {
         return baseTicketPrice * 0.6;
-    }
-
-    calculateFamilyCardDiscount(passengers: Passenger[], baseTicketPrice: number): number | undefined {
-        const lastNameSet = new Set<string>();
-
-        for (const passenger of passengers) {
-            if (passenger.lastName) {
-                if (lastNameSet.has(passenger.lastName)) {
-                    return baseTicketPrice - (baseTicketPrice * 0.3);
-                }
-                lastNameSet.add(passenger.lastName);
-            }
-        }
     }
 
     calculateTotalPrice(baseTicketPrice: number, trainDetails: TripRequest) {
