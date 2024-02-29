@@ -487,5 +487,75 @@ describe("TrainTicketEstimator", () => {
         const result = await estimator.estimate(tripRequest);
         expect(result).toBe(priceAfterDiscount);
     });
+
+	it('should not apply 30% discount for passengers with Family Card if there is no last name', async () => {
+		const tripRequest: TripRequest = {
+			passengers: [
+				{ age: 30, discounts: [], lastName: "" },
+				{ age: 30, discounts: [], lastName: "" },
+				{ age: 30, discounts: [DiscountCard.Family], lastName: "" },
+			],
+			details: {
+				from: "Paris",
+				to: "Lyon",
+				when: futureDateFortyDay,
+			},
+			trainDetails: {
+				seats: [],
+				isFull: false,
+			},
+		};
+
+		const result = await estimator.estimate(tripRequest);
+		expect(result).toBe(result);
+	})
+
+	it('should not apply 30% discount for passengers who already have another discount', async () => {
+		const tripRequest: TripRequest = {
+			passengers: [
+				{ age: 30, discounts: [DiscountCard.Couple], lastName: "Bozon" },
+				{ age: 30, discounts: [], lastName: "Bozon" },
+				{ age: 30, discounts: [DiscountCard.Family], lastName: "Bozon" },
+			],
+			details: {
+				from: "Paris",
+				to: "Lyon",
+				when: futureDateFortyDay,
+			},
+			trainDetails: {
+				seats: [],
+				isFull: false,
+			},
+		};
+
+		const result = await estimator.estimate(tripRequest);
+		expect(result).toBe(result);
+	})
+
+	it('Family Card must pass priority over other discounts', async () => {
+		const tripRequest: TripRequest = {
+			passengers: [
+				{ age: 30, discounts: [DiscountCard.Couple], lastName: "Bozon" },
+				{ age: 30, discounts: [DiscountCard.Family], lastName: "Bozon" },
+				{ age: 30, discounts: [DiscountCard.Couple], lastName: "Bozon" },
+			],
+			details: {
+				from: "Paris",
+				to: "Lyon",
+				when: futureDateFortyDay,
+			},
+			trainDetails: {
+				seats: [],
+				isFull: false,
+			},
+		};
+
+		const priceAfterDiscount = Math.round(
+			PRICE * (FIFTY_YEARS_INCREASE - 0.3) * 3
+		);
+
+		const result = await estimator.estimate(tripRequest);
+		expect(result).toBe(priceAfterDiscount);
+	})
 });
 
