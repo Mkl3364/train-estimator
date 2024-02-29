@@ -45,7 +45,7 @@ describe("TrainTicketEstimator", () => {
 
 	it("throw error when start city is invalid", () => {
 		const tripDetails: TripRequest = {
-			passengers: [{ age: 25, discounts: [] }],
+			passengers: [{ age: 25, discounts: [], lastName: 'Bozon' }],
 			details: { from: "", to: "Lyon", when: new Date() },
 			trainDetails: {
 				seats: [],
@@ -59,7 +59,7 @@ describe("TrainTicketEstimator", () => {
 
 	it("estimate throws error when destination city is invalid", async () => {
 		const tripDetails: TripRequest = {
-			passengers: [{ age: 25, discounts: [] }],
+			passengers: [{ age: 25, discounts: [], lastName: 'Bozon' }],
 			details: { from: "Paris", to: "", when: new Date() },
 			trainDetails: {
 				seats: [],
@@ -84,7 +84,7 @@ describe("TrainTicketEstimator", () => {
 		invalidDate.setDate(invalidDate.getDate() - 1);
 
 		const tripDetails: TripRequest = {
-			passengers: [{ age: 25, discounts: [] }],
+			passengers: [{ age: 25, discounts: [], lastName: 'Bozon' }],
 			details: { from: "Paris", to: "Lyon", when: invalidDate },
 			trainDetails: {
 				seats: [],
@@ -101,7 +101,7 @@ describe("TrainTicketEstimator", () => {
 		const fetchMock = jest.fn().mockRejectedValue(new ApiException());
 
 		const trainDetails: TripRequest = {
-			passengers: [{ age: 25, discounts: [] }],
+			passengers: [{ age: 25, discounts: [], lastName: 'Bozon' }],
 			details: { from: "Paris", to: "Lyon", when: new Date() },
 			trainDetails: {
 				seats: [],
@@ -119,7 +119,7 @@ describe("TrainTicketEstimator", () => {
 
 	it("Should throw error if passenger age is invalid", async () => {
 		const tripRequest: TripRequest = {
-			passengers: [{ age: -1, discounts: [] }],
+			passengers: [{ age: -1, discounts: [], lastName: 'Bozon' }],
 			details: {
 				from: "Paris",
 				to: "Lyon",
@@ -141,7 +141,7 @@ describe("TrainTicketEstimator", () => {
 			(HEIGHTEEN_YEARS_DISCOUNT - THIRTY_DAYS_DISCOUNT) * PRICE
 		);
 		const tripRequest: TripRequest = {
-			passengers: [{ age: 16, discounts: [] }],
+			passengers: [{ age: 16, discounts: [], lastName: 'Bozon' }],
 			details: {
 				from: "Paris",
 				to: "Lyon",
@@ -162,7 +162,7 @@ describe("TrainTicketEstimator", () => {
 			(SEVENTY_YEARS_DISCOUNT - THIRTY_DAYS_DISCOUNT) * PRICE
 		);
 		const tripRequest: TripRequest = {
-			passengers: [{ age: 71, discounts: [] }],
+			passengers: [{ age: 71, discounts: [], lastName: 'Bozon' }],
 			details: {
 				from: "Paris",
 				to: "Lyon",
@@ -183,7 +183,7 @@ describe("TrainTicketEstimator", () => {
 			(SEVENTY_YEARS_DISCOUNT - SENIOR_DISCOUNT - THIRTY_DAYS_DISCOUNT) * PRICE
 		);
 		const tripRequest: TripRequest = {
-			passengers: [{ age: 71, discounts: [DiscountCard.Senior] }],
+			passengers: [{ age: 71, discounts: [DiscountCard.Senior], lastName: 'Bozon' }],
 			details: {
 				from: "Paris",
 				to: "Lyon",
@@ -204,7 +204,7 @@ describe("TrainTicketEstimator", () => {
 			(FIFTY_YEARS_INCREASE - THIRTY_DAYS_DISCOUNT) * PRICE
 		);
 		const tripRequest: TripRequest = {
-			passengers: [{ age: 50, discounts: [] }],
+			passengers: [{ age: 50, discounts: [], lastName: 'Bozon' }],
 			details: {
 				from: "Paris",
 				to: "Lyon",
@@ -222,7 +222,7 @@ describe("TrainTicketEstimator", () => {
 
 	it('should apply a unique price of 9 euros for passengers below 4 years old', async () => {
 		const tripRequest: TripRequest = {
-			passengers: [{ age: 3, discounts: [] }],
+			passengers: [{ age: 3, discounts: [], lastName: 'Bozon' }],
 			details: {
 				from: "Paris",
 				to: "Lyon",
@@ -243,7 +243,7 @@ describe("TrainTicketEstimator", () => {
 			(FIFTY_YEARS_INCREASE - THIRTY_DAYS_DISCOUNT) * PRICE
 		);
 		const tripRequest: TripRequest = {
-			passengers: [{ age: 30, discounts: [] }],
+			passengers: [{ age: 30, discounts: [], lastName: 'Bozon' }],
 			details: {
 				from: "Paris",
 				to: "Lyon",
@@ -262,7 +262,7 @@ describe("TrainTicketEstimator", () => {
 
 	it("Train ticket date is between 5 and 30 days", async () => {
 		const tripRequest: TripRequest = {
-			passengers: [{ age: 30, discounts: [] }],
+			passengers: [{ age: 30, discounts: [], lastName: 'Bozon' }],
 			details: {
 				from: "Paris",
 				to: "Lyon",
@@ -281,31 +281,31 @@ describe("TrainTicketEstimator", () => {
 		const diff = Math.abs(ticketDate.getTime() - currentDate.getTime());
 		const diffDays = Math.ceil(diff / (1000 * 3600 * 24));
 
-		let ticketPrice;
+		let baseTicketPrice;
 
 		if (diffDays >= 5 && diffDays <= 29) {
 			// Apply 2% daily increase for 25 days
-			ticketPrice = PRICE * Math.pow(1.02, 25);
+			baseTicketPrice = PRICE * Math.pow(1.02, 25);
 		} else if (diffDays === 30) {
 			// Apply -18% increase for the 29th day
-			ticketPrice = PRICE * 0.82;
+			baseTicketPrice = PRICE * 0.82;
 		} else if (diffDays === 4) {
 			// Apply +30% increase for the 5th day
-			ticketPrice = PRICE * 1.30;
+			baseTicketPrice = PRICE * 1.30;
 		} else {
 			// Default calculation if outside the specified range
-			ticketPrice = PRICE;
+			baseTicketPrice = PRICE;
 		}
 
 		const result = await estimator.estimate(tripRequest);
 
-		expect(result).toBe(ticketPrice);
+		expect(result).toBe(baseTicketPrice);
 	});
 
 	it("Train date is 5days or less in the future", async () => {
 		const futurPrice = Math.round((1 + FIFTY_YEARS_INCREASE) * PRICE);
 		const tripRequest: TripRequest = {
-			passengers: [{ age: 30, discounts: [] }],
+			passengers: [{ age: 30, discounts: [], lastName: 'Bozon' }],
 			details: {
 				from: "Paris",
 				to: "Lyon",
@@ -323,7 +323,7 @@ describe("TrainTicketEstimator", () => {
 
 	it("should apply a unique price of 1 euro for passengers with a TrainStroke card", async () => {
 		const tripRequest: TripRequest = {
-			passengers: [{ age: 30, discounts: [DiscountCard.TrainStroke] }],
+			passengers: [{ age: 30, discounts: [DiscountCard.TrainStroke], lastName: 'Bozon' }],
 			details: {
 				from: "Paris",
 				to: "Lyon",
@@ -343,7 +343,7 @@ describe("TrainTicketEstimator", () => {
 	it('should apply 20% discount for each passengers in couple and adult', async () => {
 		const totalPriceFor2Tickets = 200;
 		const tripRequest: TripRequest = {
-			passengers: [{ age: 25, discounts: [] }, { age: 30, discounts: [DiscountCard.Couple] }],
+			passengers: [{ age: 25, discounts: [], lastName: 'Bozon' }, { age: 30, discounts: [DiscountCard.Couple], lastName: 'Bozon' }],
 			details: {
 				from: "Paris",
 				to: "Lyon",
@@ -355,16 +355,16 @@ describe("TrainTicketEstimator", () => {
 			}
 		};
 
-		const ticketPrice = totalPriceFor2Tickets - (PRICE * 0.2 * 2);
+		const baseTicketPrice = totalPriceFor2Tickets - (PRICE * 0.2 * 2);
 
 		const result = await estimator.estimate(tripRequest);
 
-		expect(result).toBe(ticketPrice);
+		expect(result).toBe(baseTicketPrice);
 	})
 
 	it('should apply 10 % discount for the half couple card', async () => {
 		const tripRequest: TripRequest = {
-			passengers: [{ age: 30, discounts: [DiscountCard.HalfCouple] }],
+			passengers: [{ age: 30, discounts: [DiscountCard.HalfCouple], lastName: 'Bozon' }],
 			details: {
 				from: "Paris",
 				to: "Lyon",
@@ -411,10 +411,10 @@ describe("TrainTicketEstimator", () => {
 
 	it('shoud apply a discount of 20% for passengers with a ticket bought 6 hours before the train departure', async () => {
 		const fiveHoursBeforeDeparture = new Date(new Date().getTime() - 4 * 60 * 60 * 1000)
-        const fiveHoursBeforeDepartureNumber = fiveHoursBeforeDeparture.getTime();
+		const fiveHoursBeforeDepartureNumber = fiveHoursBeforeDeparture.getTime();
 
 		const tripRequest: TripRequest = {
-			passengers: [{ age: 30, discounts: [] }],
+			passengers: [{ age: 30, discounts: [], lastName: 'Bozon' }],
 			details: {
 				from: "Paris",
 				to: "Lyon",
@@ -436,30 +436,100 @@ describe("TrainTicketEstimator", () => {
 		expect(result).toBe(priceAfterDiscount);
 	})
 
-	// it('shoud apply a increase of 100% for passengers with a ticket bought between 1 day and 6 hours before departure', async () => {
-	// 	const heightHoursBeforeDeparture = new Date(new Date().getTime() - 10 * 60 * 60 * 1000)
+	it("should apply 30% discount for passengers with Family Card", async () => {
+		const tripRequest: TripRequest = {
+			passengers: [
+				{ age: 30, discounts: [], lastName: "Bozon" },
+				{ age: 30, discounts: [], lastName: "Bozon" },
+				{ age: 30, discounts: [DiscountCard.Family], lastName: "Bozon" },
+			],
+			details: {
+				from: "Paris",
+				to: "Lyon",
+				when: futureDateFortyDay,
+			},
+			trainDetails: {
+				seats: [],
+				isFull: false,
+			},
+		};
 
-	// 	const tripRequest: TripRequest = {
-	// 		passengers: [{ age: 30, discounts: [] }],
-	// 		details: {
-	// 			from: "Paris",
-	// 			to: "Lyon",
-	// 			when: heightHoursBeforeDeparture
-	// 		},
-	// 		trainDetails: {
-	// 			seats: [
-	// 				{ number: 1, isAvailable: true },
-	// 				{ number: 2, isAvailable: true },
-	// 				{ number: 3, isAvailable: true },
-	// 				{ number: 4, isAvailable: true },
-	// 				{ number: 5, isAvailable: true },
-	// 			],
-	// 			isFull: false
-	// 		}
-	// 	};
-	// 	const priceAfterDiscount = Math.round(PRICE * (FIFTY_YEARS_INCREASE + 1));
-	// 	const result = await estimator.estimate(tripRequest);
-	// 	expect(result).toBe(priceAfterDiscount);
-	// })
+		const priceAfterDiscount = Math.round(
+			PRICE * (FIFTY_YEARS_INCREASE - 0.3) * 3
+		);
+
+		const result = await estimator.estimate(tripRequest);
+		expect(result).toBe(priceAfterDiscount);
+	});
+
+	it('should not apply 30% discount for passengers with Family Card if there is no last name', async () => {
+		const tripRequest: TripRequest = {
+			passengers: [
+				{ age: 30, discounts: [], lastName: "" },
+				{ age: 30, discounts: [], lastName: "" },
+				{ age: 30, discounts: [DiscountCard.Family], lastName: "" },
+			],
+			details: {
+				from: "Paris",
+				to: "Lyon",
+				when: futureDateFortyDay,
+			},
+			trainDetails: {
+				seats: [],
+				isFull: false,
+			},
+		};
+
+		const result = await estimator.estimate(tripRequest);
+		expect(result).toBe(result);
+	})
+
+	it('should not apply 30% discount for passengers who already have another discount', async () => {
+		const tripRequest: TripRequest = {
+			passengers: [
+				{ age: 30, discounts: [DiscountCard.Couple], lastName: "Bozon" },
+				{ age: 30, discounts: [], lastName: "Bozon" },
+				{ age: 30, discounts: [DiscountCard.Family], lastName: "Bozon" },
+			],
+			details: {
+				from: "Paris",
+				to: "Lyon",
+				when: futureDateFortyDay,
+			},
+			trainDetails: {
+				seats: [],
+				isFull: false,
+			},
+		};
+
+		const result = await estimator.estimate(tripRequest);
+		expect(result).toBe(result);
+	})
+
+	it('Family Card must pass priority over other discounts', async () => {
+		const tripRequest: TripRequest = {
+			passengers: [
+				{ age: 30, discounts: [DiscountCard.Couple], lastName: "Bozon" },
+				{ age: 30, discounts: [DiscountCard.Family], lastName: "Bozon" },
+				{ age: 30, discounts: [DiscountCard.Couple], lastName: "Bozon" },
+			],
+			details: {
+				from: "Paris",
+				to: "Lyon",
+				when: futureDateFortyDay,
+			},
+			trainDetails: {
+				seats: [],
+				isFull: false,
+			},
+		};
+
+		const priceAfterDiscount = Math.round(
+			PRICE * (FIFTY_YEARS_INCREASE - 0.3) * 3
+		);
+
+		const result = await estimator.estimate(tripRequest);
+		expect(result).toBe(priceAfterDiscount);
+	})
 });
 
