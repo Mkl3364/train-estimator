@@ -2,7 +2,48 @@ import { ApiException, DiscountCard, InvalidTripInputException, Passenger, Train
 
 const YOUNG_PASSENGER_PRICE = 9;
 const EMPOYEES_PRICE = 1;
-export class TrainTicketEstimator {
+const API_BASE_URL= 'https://sncftrenitaliadb.com/api/train/estimate/price';
+
+interface urlParams {
+    from: string,
+    to: string,
+    when: Date
+}
+
+class TrainTicketAPI {
+
+    private readonly baseurl: string;
+
+    constructor(baseurl: string) {
+        this.baseurl = baseurl;
+    }
+
+    constructParams({from, to, when }: urlParams): string {
+        return `?from=${from}&to=${to}&date=${when}`;
+    }
+
+    constructHeaders(header?: Record<string, string>): Record<string, string> {
+        return {
+            'Content-Type': 'application/json',
+            ...header
+        };
+    }
+
+    private url(params: urlParams): string {
+        return API_BASE_URL + this.constructParams(params);
+    }
+
+    async getRequest(params: urlParams, header?: Record<string, string>) {
+        const request = await fetch(this.url(params), this.constructHeaders(header));
+        const response = await request.json();
+        return response
+    }
+}
+export class TrainTicketEstimator extends TrainTicketAPI {
+
+    constructor() {
+        super(API_BASE_URL);
+    }
 
     getAvailableSeats(trainDetails: TrainDetails): number {
         if (trainDetails.isFull) {
@@ -35,15 +76,16 @@ export class TrainTicketEstimator {
     }
 
     private async fetchTicketApi(trainDetails: Pick<TripRequest, 'details'>): Promise<number> {
-        const url = `https://sncftrenitaliadb.com/api/train/estimate/price?from=${trainDetails.details.from}&to=${trainDetails.details.to}&date=${trainDetails.details.when}`;
+        const { from, to, when } = trainDetails.details
 
         try {
-            const request = await fetch(url);
-            const response = await request.json();
+            const response = await this.getRequest({ from, to, when });
             return response.price;
         } catch (error) {
             throw new ApiException();
         }
+
+
     }
 
     calculatebaseTicketPrice(passenger: Passenger, baseTicketPrice: number, trainDetails: TripRequest) {
