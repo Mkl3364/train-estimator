@@ -436,57 +436,31 @@ describe("TrainTicketEstimator", () => {
 		expect(result).toBe(priceAfterDiscount);
 	})
 
-	// it('shoud apply a increase of 100% for passengers with a ticket bought between 1 day and 6 hours before departure', async () => {
-	// 	const heightHoursBeforeDeparture = new Date(new Date().getTime() - 10 * 60 * 60 * 1000)
-
-	// 	const tripRequest: TripRequest = {
-	// 		passengers: [{ age: 30, discounts: [] }],
-	// 		details: {
-	// 			from: "Paris",
-	// 			to: "Lyon",
-	// 			when: heightHoursBeforeDeparture
-	// 		},
-	// 		trainDetails: {
-	// 			seats: [
-	// 				{ number: 1, isAvailable: true },
-	// 				{ number: 2, isAvailable: true },
-	// 				{ number: 3, isAvailable: true },
-	// 				{ number: 4, isAvailable: true },
-	// 				{ number: 5, isAvailable: true },
-	// 			],
-	// 			isFull: false
-	// 		}
-	// 	};
-	// 	const priceAfterDiscount = Math.round(PRICE * (FIFTY_YEARS_INCREASE + 1));
-	// 	const result = await estimator.estimate(tripRequest);
-	// 	expect(result).toBe(priceAfterDiscount);
-	// })
-
 	it("should apply 30% discount for passengers with Family Card", async () => {
-        const tripRequest: TripRequest = {
-            passengers: [
-                { age: 30, discounts: [], lastName: "Bozon" },
-                { age: 30, discounts: [], lastName: "Bozon" },
-                { age: 30, discounts: [DiscountCard.Family], lastName: "Bozon" },
-            ],
-            details: {
-                from: "Paris",
-                to: "Lyon",
-                when: futureDateFortyDay,
-            },
-            trainDetails: {
-                seats: [],
-                isFull: false,
-            },
-        };
+		const tripRequest: TripRequest = {
+			passengers: [
+				{ age: 30, discounts: [], lastName: "Bozon" },
+				{ age: 30, discounts: [], lastName: "Bozon" },
+				{ age: 30, discounts: [DiscountCard.Family], lastName: "Bozon" },
+			],
+			details: {
+				from: "Paris",
+				to: "Lyon",
+				when: futureDateFortyDay,
+			},
+			trainDetails: {
+				seats: [],
+				isFull: false,
+			},
+		};
 
-        const priceAfterDiscount = Math.round(
-            PRICE * (FIFTY_YEARS_INCREASE - 0.3) * 3
-        );
+		const priceAfterDiscount = Math.round(
+			PRICE * (FIFTY_YEARS_INCREASE - 0.3) * 3
+		);
 
-        const result = await estimator.estimate(tripRequest);
-        expect(result).toBe(priceAfterDiscount);
-    });
+		const result = await estimator.estimate(tripRequest);
+		expect(result).toBe(priceAfterDiscount);
+	});
 
 	it('should not apply 30% discount for passengers with Family Card if there is no last name', async () => {
 		const tripRequest: TripRequest = {

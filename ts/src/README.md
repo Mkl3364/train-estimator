@@ -1,5 +1,9 @@
 # Train estimator exercice
 
+We worked in teams of 2 developers : 
+- Bozon Loïc : [Github Profile](https://github.com/loicbozon)
+- Brunet Mickael : [Github Profile](https://github.com/Mkl3364)
+
 ## Workflow 
 
 We first started to implement tests against the class `Train Estimator`. We implemented roughly 10 - 15 tests.
