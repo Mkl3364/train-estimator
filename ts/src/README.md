@@ -35,4 +35,7 @@ We implemented the `calculateFamilyCardDiscount` function to handle all logic de
 
 ## Mutation testing
 
+We launched Stryker to make a mutation testing. We ended up having a score of 94,50%
+218 mutants were launched in the project.
+206 mutants timed out.
 
