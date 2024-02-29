@@ -462,24 +462,30 @@ describe("TrainTicketEstimator", () => {
 	// 	expect(result).toBe(priceAfterDiscount);
 	// })
 
-	it('should apply 30% discount for passengers with Family Card', async () => {
-		const tripRequest: TripRequest = {
-			passengers: [{ age: 30, discounts: [], lastName: 'Bozon' }, { age: 30, discounts: [], lastName: 'Bozon' }, { age: 30, discounts: [DiscountCard.Family], lastName: 'Bozon' }],
-			details: {
-				from: "Paris",
-				to: "Lyon",
-				when: futureDateFortyDay,
-			},
-			trainDetails: {
-				seats: [],
-				isFull: false
-			}
-		}
+	it("should apply 30% discount for passengers with Family Card", async () => {
+        const tripRequest: TripRequest = {
+            passengers: [
+                { age: 30, discounts: [], lastName: "Bozon" },
+                { age: 30, discounts: [], lastName: "Bozon" },
+                { age: 30, discounts: [DiscountCard.Family], lastName: "Bozon" },
+            ],
+            details: {
+                from: "Paris",
+                to: "Lyon",
+                when: futureDateFortyDay,
+            },
+            trainDetails: {
+                seats: [],
+                isFull: false,
+            },
+        };
 
-		const priceAfterDiscount = (PRICE - (PRICE * 0.3)) * 3
+        const priceAfterDiscount = Math.round(
+            PRICE * (FIFTY_YEARS_INCREASE - 0.3) * 3
+        );
 
-		const result = await estimator.estimate(tripRequest);
-		expect(result).toBe(priceAfterDiscount);
-	})
+        const result = await estimator.estimate(tripRequest);
+        expect(result).toBe(priceAfterDiscount);
+    });
 });
 
